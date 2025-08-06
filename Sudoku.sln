@@ -1,0 +1,22 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sudoku.Blazor", "Sudoku.Blazor\Sudoku.Blazor.csproj", "{691E7B3E-97A3-43EF-8AEE-E6563E3A620D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sudoku.DataAccess", "Sudoku.DataAccess\Sudoku.DataAccess.csproj", "{36681F8C-AEA1-4279-80FE-570904DD65C6}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{691E7B3E-97A3-43EF-8AEE-E6563E3A620D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{691E7B3E-97A3-43EF-8AEE-E6563E3A620D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{691E7B3E-97A3-43EF-8AEE-E6563E3A620D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{691E7B3E-97A3-43EF-8AEE-E6563E3A620D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{36681F8C-AEA1-4279-80FE-570904DD65C6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{36681F8C-AEA1-4279-80FE-570904DD65C6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{36681F8C-AEA1-4279-80FE-570904DD65C6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{36681F8C-AEA1-4279-80FE-570904DD65C6}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal

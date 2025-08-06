@@ -1,0 +1,122 @@
+@page "/"
+
+@rendermode InteractiveServer
+
+@using Sudoku.DataAccess.Enums
+@using Sudoku.DataAccess.Models
+
+<table class="grid" tabindex="-1" @onkeydown="OnKeyDown" @onkeyup="OnKeyUp" @onkeydown:preventDefault="true">
+    <tbody>
+    @foreach (var row in Enumerable.Range(0, grid.Size)) {
+        <tr>
+            @foreach (var col in Enumerable.Range(0, grid.Size)) {
+                <td
+                    aria-selected="@(grid.Cells[row, col].IsSelected ? "true" : "false")"
+                    class="@GetCellBorders(row, col)">
+                    <div
+                        class="cell"
+                        @onmousedown="() => OnMouseDown(row, col)"
+                        @onmouseup="() => OnMouseUp()"
+                        @onmouseenter="() => OnMouseEnter(row, col)">
+                        @grid.Cells[row, col].Value
+                    </div>
+                </td>
+            }
+        </tr>
+    }
+    </tbody>
+</table>
+
+@code {
+    private GridModel grid = new();
+
+    private bool isMouseDown;
+    private bool isShiftKeyDown;
+
+    private string GetCellBorders(int row, int col) {
+        var borders = grid.Cells[row, col].Borders;
+
+        if (borders == Borders.None) {
+            return string.Empty;
+        }
+
+        return borders.HasFlag(Borders.All) ? "top right bottom left" : borders.ToString().ToLower().Replace(", ", " ");
+    }
+    
+    private void OnMouseDown(int row, int col) {
+        isMouseDown = true;
+
+        if (isShiftKeyDown) {
+            if (grid.Cells[row, col].IsSelected) {
+                grid.Mode = GridMode.Delete;
+            }
+            else if (!grid.Cells[row, col].IsSelected) {
+                grid.Mode = GridMode.Select;
+            }
+        }
+        grid.SortSelection(grid.Cells[row, col]);
+    }
+
+    private void OnMouseUp() {
+        isMouseDown = false;
+        grid.Mode = GridMode.Regular;
+    }
+
+    private void OnMouseEnter(int row, int col) {
+        if (!isMouseDown) return;
+
+        if (grid.Mode == GridMode.Regular) {
+            grid.Mode = GridMode.Select;
+        }
+        
+        grid.SortSelection(grid.Cells[row, col]);
+    }
+
+    private void OnKeyDown(KeyboardEventArgs e) {
+        isShiftKeyDown = e.ShiftKey;
+        
+        var lastSelected = grid.SelectedCells.GetLastSelected();
+        CellModel neighbor;
+
+        switch (e.Key) {
+            case { Length: 1 }:
+                grid.SetCell(e.Key.ToUpper()[0]);
+                break;
+            case "Backspace":
+                grid.SetCell('\0');
+                break;
+            case "ArrowUp":
+                grid.SortSelection(
+                    lastSelected.Neighbors.TryGetValue(Direction.Up, out neighbor)
+                        ? neighbor
+                        : grid.Cells[grid.Size - 1, lastSelected.Col]
+                );
+                break;
+            case "ArrowRight":
+                grid.SortSelection(
+                    lastSelected.Neighbors.TryGetValue(Direction.Right, out neighbor)
+                        ? neighbor
+                        : grid.Cells[lastSelected.Row, 0]
+                );
+                break;
+            case "ArrowDown":
+                grid.SortSelection(
+                    lastSelected.Neighbors.TryGetValue(Direction.Down, out neighbor)
+                        ? neighbor
+                        : grid.Cells[0, lastSelected.Col]
+                );
+                break;
+            case "ArrowLeft":
+                grid.SortSelection(
+                    lastSelected.Neighbors.TryGetValue(Direction.Left, out neighbor)
+                        ? neighbor
+                        : grid.Cells[lastSelected.Row, grid.Size - 1]
+                );
+                break;
+        }
+    }
+
+    private void OnKeyUp(KeyboardEventArgs e) {
+        isShiftKeyDown = e.ShiftKey;
+    }
+}
