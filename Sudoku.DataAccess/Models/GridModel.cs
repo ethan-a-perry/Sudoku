@@ -8,12 +8,17 @@ public class GridModel
 	public int Size { get; set; } = 9;
 	public CellModel?[,] Cells { get; set; }
 	public GridMode Mode { get; set; } = GridMode.Regular;
+	
+	/// <summary>
+	/// Custom LinkedHashSet that preserves insertion order.
+	/// </summary>
 	public LinkedHashSet<CellModel>SelectedCells { get; set; } = [];
 
 	public GridModel()
 	{
 		Cells = new CellModel[Size, Size];
 		
+		// Initialize the grid by creating an empty CellModel for each position.
 		for (int row = 0; row < Size; row++) {
 			for (int col = 0; col < Size; col++) {
 				Cells[row, col] = new CellModel {
@@ -23,12 +28,18 @@ public class GridModel
 			}
 		}
 
+		// Establish neighbor relationships for every cell in the grid.
 		foreach (var cell in Cells) {
 			foreach (var direction in Enum.GetValues<Direction>()) {
 				var offset = DirectionHelper.Offset(direction);
 				
 				(int row, int col) neighbor = (cell.Row + offset.row, cell.Col + offset.col);
 				
+				/*
+				 * If the calculated neighbor coordinates fall outside the grid boundaries,
+				 * the cell is on an edge in that direction and has no neighbor there.
+				 * Otherwise, assign the neighboring cell accordingly.
+				*/
 				if (neighbor.row >= 0 && neighbor.row < Size && neighbor.col >= 0 && neighbor.col < Size) {
 					cell.Neighbors[direction] = Cells[neighbor.row, neighbor.col];
 				}
@@ -36,13 +47,20 @@ public class GridModel
 		}
 	}
 	
+	/// <summary>
+	/// Detects edge turns within 2x2 regions containing the given cell and applies corner borders
+	/// to maintain a continuous visual outline without breaks.
+	/// </summary>
+	/// <param name="cell">The cell for which to adjust corner borders based on its regions.</param>
 	private void AdjustCorners(CellModel cell) {
 		foreach (var anchor in cell.GetRegionAnchors()) {
 			var topLeft = anchor.Neighbors[Direction.TopLeft];
 			var topRight = anchor.Neighbors[Direction.Top];
 			var bottomLeft = anchor.Neighbors[Direction.Left];
-			// bottomRight = anchor
+			// bottomRight as denoted by "anchor".
 
+			// There are exactly 4 patterns where three cells are selected in a 2x2 region,
+			// thus indicating an edge-turn is present which requires a corner border.
 			switch (topLeft.IsSelected, topRight.IsSelected, bottomLeft.IsSelected, anchor.IsSelected) {
 				case (false, true, true, true):
 					anchor.Borders |= Borders.TopLeftCorner;
@@ -56,6 +74,7 @@ public class GridModel
 				case (true, true, true ,false):
 					topLeft.Borders |= Borders.BottomRightCorner;
 					break;
+				// If no edge-turn exists, remove any potential corner borders applied earlier.
 				default:
 					topLeft.Borders &= ~Borders.BottomRightCorner;
 					topRight.Borders &= ~Borders.BottomLeftCorner;
@@ -66,6 +85,9 @@ public class GridModel
 		}
 	}
 
+	/// <summary>
+	/// Adjust border styling when selecting and unselecting any cells.
+	/// </summary>
 	private void AdjustBorders(CellModel cell) {
 		if (cell.IsSelected) {
 			cell.Borders |= Borders.AllBorders;
@@ -108,6 +130,7 @@ public class GridModel
 		}
 	}
 
+	// See GridMode.cs for an explanation on the various grid modes/states.
 	public void SortSelection(CellModel cell) {
 		switch (Mode) {
 			case GridMode.Regular:
@@ -132,6 +155,9 @@ public class GridModel
 		}
 	}
 
+	/// <summary>
+	/// Place a character in the cell only if it doesn't alrady contain a given cell.
+	/// </summary>
 	public void SetCell(char value) {
 		foreach (var cell in SelectedCells) {
 			if (!cell.IsGiven) {
@@ -140,9 +166,13 @@ public class GridModel
 		}
 	}
 
+	/// <summary>
+	/// Moves the current cell selection in the grid based on the user's arrow key input.
+	/// </summary>
 	public void TraverseGrid(string arrowKey) {
 		var lastSelectedCell = SelectedCells.GetLastSelected();
 		
+		// Wrap the selection to the opposite side of the grid if the user moves off the edge of the grid.
 		(Direction direction, (int row, int col) fallback) =
 			arrowKey switch {
 				"ArrowUp" => (Direction.Top, (Size - 1, lastSelectedCell.Col)),
@@ -151,6 +181,7 @@ public class GridModel
 				"ArrowLeft" => (Direction.Left, (lastSelectedCell.Row, Size - 1))
 			};
 
+		// Select neighbor or wrap around the grid if no neighbor exists.
 		SortSelection(lastSelectedCell.Neighbors.TryGetValue(direction, out var neighbor)
 			? neighbor
 			: Cells[fallback.row, fallback.col]

@@ -1,5 +1,8 @@
 namespace Sudoku.DataAccess.Enums;
 
+/// <summary>
+/// Ensures a selected cell is properly styled by applying borders where necessary.
+/// </summary>
 [Flags]
 public enum Borders
 {
@@ -11,6 +14,7 @@ public enum Borders
     Left = 1 << 4,
     AllBorders = Top | Right | Bottom | Left,
     
+    // Corner borders are only used when the outline makes an edge-turn.
     TopLeftCorner = 1 << 5,
     TopRightCorner = 1 << 6,
     BottomLeftCorner = 1 << 7,

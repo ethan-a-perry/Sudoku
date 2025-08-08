@@ -26,9 +26,14 @@
     private bool isMouseDown;
     private bool isShiftKeyDown;
     
+    /// <summary>
+    /// Constructs a space-separated string of CSS border class names for the cell at the given row and column.
+    /// </summary>
+    /// <returns>A string containing the applicable border class names in lowercase.</returns>
     private string GetBorderClasses(int row, int col) {
         var borders = grid.Cells[row, col].Borders;
         
+        // Finds a cell's Border flags.
         return string.Join(
             " ",
             Enum.GetValues(typeof(Borders))
@@ -41,16 +46,22 @@
                 .Select(flag => flag.ToString().ToLower())
             );
     }
-
+    
     private bool IsPowerOfTwo(int value) {
+        // Uses bitwise operations.
         return (value & (value - 1)) == 0;
     }
     
+    /// <summary>
+    /// Checks when a mouse is pressed down, not necessarily clicked.
+    /// </summary>
     private void OnMouseDown(MouseEventArgs e, int row, int col) {
+        // If the user right-clicks or opens the context menu, restrict grid interactivity.
         if (e.Button != 0) return;
         
         isMouseDown = true;
-
+        
+        // See GridMode.cs for info about the various grid modes.
         if (isShiftKeyDown) {
             grid.Mode = grid.Cells[row, col].IsSelected switch {
                 true => GridMode.Delete,
@@ -58,14 +69,18 @@
             };
         }
         
+        // Figure out of a cell is selected or deselected.
         grid.SortSelection(grid.Cells[row, col]);
     }
-
+    
     private void OnMouseUp() {
         isMouseDown = false;
         grid.Mode = GridMode.Regular;
     }
-
+    
+    /// <summary>
+    /// Lets the user toggle a cell whenever they are dragging their mouse.
+    /// </summary>
     private void OnMouseEnter(int row, int col) {
         if (!isMouseDown) return;
 
@@ -77,6 +92,7 @@
     }
 
     private void OnKeyDown(KeyboardEventArgs e) {
+        // If the shiftkey is pressed, Select or Delete mode can be activated.
         isShiftKeyDown = e.ShiftKey;
 
         switch (e.Key) {
