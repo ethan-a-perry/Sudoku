@@ -2,8 +2,12 @@ namespace Sudoku.DataAccess.Enums;
 
 public enum Direction
 {
-    Up,
+    Top,
     Right,
-    Down,
-    Left
+    Bottom,
+    Left,
+    TopLeft,
+    TopRight,
+    BottomLeft,
+    BottomRight
 }

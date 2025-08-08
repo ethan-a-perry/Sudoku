@@ -5,55 +5,59 @@
 @using Sudoku.DataAccess.Enums
 @using Sudoku.DataAccess.Models
 
-<table class="grid" tabindex="-1" @onkeydown="OnKeyDown" @onkeyup="OnKeyUp" @onkeydown:preventDefault="true">
-    <tbody>
-    @foreach (var row in Enumerable.Range(0, grid.Size)) {
-        <tr>
-            @foreach (var col in Enumerable.Range(0, grid.Size)) {
-                <td
-                    aria-selected="@(grid.Cells[row, col].IsSelected ? "true" : "false")"
-                    class="@GetCellBorders(row, col)">
-                    <div
-                        class="cell"
-                        @onmousedown="() => OnMouseDown(row, col)"
-                        @onmouseup="() => OnMouseUp()"
-                        @onmouseenter="() => OnMouseEnter(row, col)">
-                        @grid.Cells[row, col].Value
-                    </div>
-                </td>
-            }
-        </tr>
+<div class="grid" tabindex="-1" @onkeydown="OnKeyDown" @onkeyup="OnKeyUp" @onkeydown:preventDefault="true">
+    @foreach (var cell in grid.Cells) {
+        var row = cell.Row;
+        var col = cell.Col;
+        <div
+            class="cell @GetBorderClasses(row, col)"
+            aria-selected="@(grid.Cells[row, col].IsSelected ? "true" : "false")"
+            @onmousedown="e => OnMouseDown(e, row, col)"
+            @onmouseup="() => OnMouseUp()"
+            @onmouseenter="() => OnMouseEnter(row, col)">
+            @grid.Cells[row, col].Value
+        </div>
     }
-    </tbody>
-</table>
+</div>
 
 @code {
     private GridModel grid = new();
 
     private bool isMouseDown;
     private bool isShiftKeyDown;
-
-    private string GetCellBorders(int row, int col) {
+    
+    private string GetBorderClasses(int row, int col) {
         var borders = grid.Cells[row, col].Borders;
+        
+        return string.Join(
+            " ",
+            Enum.GetValues(typeof(Borders))
+                .Cast<Borders>()
+                .Where(flag =>
+                    flag != Borders.None
+                    && borders.HasFlag(flag)
+                    && IsPowerOfTwo((int)flag)
+                )
+                .Select(flag => flag.ToString().ToLower())
+            );
+    }
 
-        if (borders == Borders.None) {
-            return string.Empty;
-        }
-
-        return borders.HasFlag(Borders.All) ? "top right bottom left" : borders.ToString().ToLower().Replace(", ", " ");
+    private bool IsPowerOfTwo(int value) {
+        return (value & (value - 1)) == 0;
     }
     
-    private void OnMouseDown(int row, int col) {
+    private void OnMouseDown(MouseEventArgs e, int row, int col) {
+        if (e.Button != 0) return;
+        
         isMouseDown = true;
 
         if (isShiftKeyDown) {
-            if (grid.Cells[row, col].IsSelected) {
-                grid.Mode = GridMode.Delete;
-            }
-            else if (!grid.Cells[row, col].IsSelected) {
-                grid.Mode = GridMode.Select;
-            }
+            grid.Mode = grid.Cells[row, col].IsSelected switch {
+                true => GridMode.Delete,
+                false => GridMode.Select
+            };
         }
+        
         grid.SortSelection(grid.Cells[row, col]);
     }
 
@@ -74,9 +78,6 @@
 
     private void OnKeyDown(KeyboardEventArgs e) {
         isShiftKeyDown = e.ShiftKey;
-        
-        var lastSelected = grid.SelectedCells.GetLastSelected();
-        CellModel neighbor;
 
         switch (e.Key) {
             case { Length: 1 }:
@@ -85,33 +86,8 @@
             case "Backspace":
                 grid.SetCell('\0');
                 break;
-            case "ArrowUp":
-                grid.SortSelection(
-                    lastSelected.Neighbors.TryGetValue(Direction.Up, out neighbor)
-                        ? neighbor
-                        : grid.Cells[grid.Size - 1, lastSelected.Col]
-                );
-                break;
-            case "ArrowRight":
-                grid.SortSelection(
-                    lastSelected.Neighbors.TryGetValue(Direction.Right, out neighbor)
-                        ? neighbor
-                        : grid.Cells[lastSelected.Row, 0]
-                );
-                break;
-            case "ArrowDown":
-                grid.SortSelection(
-                    lastSelected.Neighbors.TryGetValue(Direction.Down, out neighbor)
-                        ? neighbor
-                        : grid.Cells[0, lastSelected.Col]
-                );
-                break;
-            case "ArrowLeft":
-                grid.SortSelection(
-                    lastSelected.Neighbors.TryGetValue(Direction.Left, out neighbor)
-                        ? neighbor
-                        : grid.Cells[lastSelected.Row, grid.Size - 1]
-                );
+            case "ArrowUp" or "ArrowRight" or "ArrowDown" or "ArrowLeft":
+                grid.TraverseGrid(e.Key);
                 break;
         }
     }

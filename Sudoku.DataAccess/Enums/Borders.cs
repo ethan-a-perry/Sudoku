@@ -3,10 +3,19 @@ namespace Sudoku.DataAccess.Enums;
 [Flags]
 public enum Borders
 {
-    None = 0,
-    Top = 1,
-    Right = 2,
-    Bottom = 4,
-    Left = 8,
-    All = Top | Right | Bottom | Left
+    None = 1 << 0,
+    
+    Top = 1 << 1,
+    Right = 1 << 2,
+    Bottom = 1 << 3,
+    Left = 1 << 4,
+    AllBorders = Top | Right | Bottom | Left,
+    
+    TopLeftCorner = 1 << 5,
+    TopRightCorner = 1 << 6,
+    BottomLeftCorner = 1 << 7,
+    BottomRightCorner = 1 << 8,
+    AllCorners = TopLeftCorner | TopRightCorner | BottomLeftCorner | BottomRightCorner,
+    
+    All =  AllBorders | AllCorners
 }

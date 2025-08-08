@@ -1,21 +1,14 @@
-using MongoDB.Bson;
-using MongoDB.Bson.Serialization.Attributes;
 using Sudoku.DataAccess.Enums;
+using Sudoku.DataAccess.Helpers;
 
 namespace Sudoku.DataAccess.Models;
 
 public class GridModel
 {
-	[BsonId]
-	[BsonRepresentation(BsonType.ObjectId)]
-	public string Id { get; set; }
-
 	public int Size { get; set; } = 9;
 	public CellModel?[,] Cells { get; set; }
-	
-	public LinkedHashSet<CellModel> SelectedCells { get; set; } = [];
-	
 	public GridMode Mode { get; set; } = GridMode.Regular;
+	public LinkedHashSet<CellModel>SelectedCells { get; set; } = [];
 
 	public GridModel()
 	{
@@ -31,64 +24,87 @@ public class GridModel
 		}
 
 		foreach (var cell in Cells) {
-			if (cell.Row > 0) {
-				cell.Neighbors[Direction.Up] = Cells[cell.Row - 1, cell.Col];
+			foreach (var direction in Enum.GetValues<Direction>()) {
+				var offset = DirectionHelper.Offset(direction);
+				
+				(int row, int col) neighbor = (cell.Row + offset.row, cell.Col + offset.col);
+				
+				if (neighbor.row >= 0 && neighbor.row < Size && neighbor.col >= 0 && neighbor.col < Size) {
+					cell.Neighbors[direction] = Cells[neighbor.row, neighbor.col];
+				}
 			}
+		}
+	}
+	
+	private void AdjustCorners(CellModel cell) {
+		foreach (var anchor in cell.GetRegionAnchors()) {
+			var topLeft = anchor.Neighbors[Direction.TopLeft];
+			var topRight = anchor.Neighbors[Direction.Top];
+			var bottomLeft = anchor.Neighbors[Direction.Left];
+			// bottomRight = anchor
 
-			if (cell.Col < Size - 1) {
-				cell.Neighbors[Direction.Right] = Cells[cell.Row, cell.Col + 1];
-			}
-			
-			if (cell.Row < Size - 1) {
-				cell.Neighbors[Direction.Down] = Cells[cell.Row + 1, cell.Col];
-			}
-
-			if (cell.Col > 0) {
-				cell.Neighbors[Direction.Left] = Cells[cell.Row, cell.Col - 1];
+			switch (topLeft.IsSelected, topRight.IsSelected, bottomLeft.IsSelected, anchor.IsSelected) {
+				case (false, true, true, true):
+					anchor.Borders |= Borders.TopLeftCorner;
+					break;
+				case (true, false, true ,true):
+					bottomLeft.Borders |= Borders.TopRightCorner;
+					break;
+				case (true, true, false, true):
+					topRight.Borders |= Borders.BottomLeftCorner;
+					break;
+				case (true, true, true ,false):
+					topLeft.Borders |= Borders.BottomRightCorner;
+					break;
+				default:
+					topLeft.Borders &= ~Borders.BottomRightCorner;
+					topRight.Borders &= ~Borders.BottomLeftCorner;
+					bottomLeft.Borders &= ~Borders.TopRightCorner;
+					anchor.Borders &= ~Borders.TopLeftCorner;
+					break;
 			}
 		}
 	}
 
-	private void SelectCell(CellModel cell) {
-		SelectedCells.Add(cell);
-		cell.IsSelected = true;
-		UpdateBorders(cell);
-	}
-
-	private void DeselectCell(CellModel cell) {
-		SelectedCells.Remove(cell);
-		cell.IsSelected = false;
-		UpdateBorders(cell);
-	}
-
-	public void DeselectAllCells() {
-		foreach (var cell in SelectedCells.ToList()) {
-			DeselectCell(cell);
+	private void AdjustBorders(CellModel cell) {
+		if (cell.IsSelected) {
+			cell.Borders |= Borders.AllBorders;
 		}
-	}
-
-	private void UpdateBorders(CellModel cell) {
-		cell.Borders = cell.IsSelected ? Borders.All : Borders.None;
-
-		Dictionary<Direction, (Borders CellBorder, Borders NeighborBorder)> borderMap = new() {
-			[Direction.Up] = (Borders.Top, Borders.Bottom),
-			[Direction.Right] = (Borders.Right, Borders.Left),
-			[Direction.Down] = (Borders.Bottom, Borders.Top),
-			[Direction.Left] = (Borders.Left, Borders.Right)
-		};
-
-		foreach (var (direction, neighbor) in cell.Neighbors) {
+		else {
+			cell.Borders &= ~Borders.AllBorders;
+		}
+		
+		foreach (var (direction, neighbor) in cell.GetOrthogonalNeighbors()) {
 			if (!neighbor.IsSelected) continue;
-			
-			var (cellBorder, neighborBorder) = borderMap[direction];
-			
+
 			if (cell.IsSelected) {
+				var (cellBorder, neighborBorder) = DirectionHelper.GetEdge(direction);
 				cell.Borders &= ~cellBorder;
 				neighbor.Borders &= ~neighborBorder;
 			}
 			else {
-				neighbor.Borders |= neighborBorder;
+				neighbor.Borders |= DirectionHelper.GetEdge(direction).neighborBorder;
 			}
+		}
+
+		AdjustCorners(cell);
+	}
+	
+	private void SelectCell(CellModel cell) {
+		SelectedCells.Add(cell);
+		cell.IsSelected = true;
+		AdjustBorders(cell);
+	}
+	
+	private void DeselectCell(CellModel cell) {
+		SelectedCells.Remove(cell);
+		cell.IsSelected = false;
+		AdjustBorders(cell);
+	}
+
+	private void DeselectAllCells() {
+		foreach (var cell in SelectedCells.ToList()) {
+			DeselectCell(cell);
 		}
 	}
 
@@ -122,5 +138,22 @@ public class GridModel
 				cell.Value = value;
 			}
 		}
+	}
+
+	public void TraverseGrid(string arrowKey) {
+		var lastSelectedCell = SelectedCells.GetLastSelected();
+		
+		(Direction direction, (int row, int col) fallback) =
+			arrowKey switch {
+				"ArrowUp" => (Direction.Top, (Size - 1, lastSelectedCell.Col)),
+				"ArrowRight" => (Direction.Right, (lastSelectedCell.Row, 0)),
+				"ArrowDown" => (Direction.Bottom, (0, lastSelectedCell.Col)),
+				"ArrowLeft" => (Direction.Left, (lastSelectedCell.Row, Size - 1))
+			};
+
+		SortSelection(lastSelectedCell.Neighbors.TryGetValue(direction, out var neighbor)
+			? neighbor
+			: Cells[fallback.row, fallback.col]
+		);
 	}
 }
