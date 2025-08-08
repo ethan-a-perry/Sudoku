@@ -11,5 +11,4 @@ public class CellModel
 	public bool IsSelected { get; set; }
 	public Borders Borders { get; set; }
 	public Dictionary<Direction, CellModel> Neighbors { get; set; } = new();
-	public bool HasNeighbor(Direction direction) => Neighbors.ContainsKey(direction);
 }
