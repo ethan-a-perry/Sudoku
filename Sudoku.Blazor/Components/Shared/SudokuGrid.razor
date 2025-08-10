@@ -1,0 +1,14 @@
+<div class="grid" tabindex="-1" @onkeydown="OnKeyDown" @onkeyup="OnKeyUp" @onkeydown:preventDefault="true">
+    @foreach (var cell in Grid.Cells) {
+        var row = cell.Row;
+        var col = cell.Col;
+        <div
+            class="cell @GetBorderClasses(row, col)"
+            aria-selected="@(Grid.Cells[row, col].IsSelected ? "true" : "false")"
+            @onmousedown="e => OnMouseDown(e, row, col)"
+            @onmouseup="() => OnMouseUp()"
+            @onmouseenter="() => OnMouseEnter(row, col)">
+            @Grid.Cells[row, col].Value
+        </div>
+    }
+</div>
