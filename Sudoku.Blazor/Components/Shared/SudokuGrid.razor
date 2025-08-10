@@ -3,7 +3,7 @@
         var row = cell.Row;
         var col = cell.Col;
         <div
-            class="cell @GetBorderClasses(row, col)"
+            class="cell"
             aria-selected="@(Grid.Cells[row, col].IsSelected ? "true" : "false")"
             @onmousedown="e => OnMouseDown(e, row, col)"
             @onmouseup="() => OnMouseUp()"

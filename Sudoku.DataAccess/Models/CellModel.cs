@@ -9,6 +9,4 @@ public class CellModel
 	public int Col { get; set; }
 	public char? Value { get; set; }
 	public bool IsSelected { get; set; }
-	public Borders Borders { get; set; }
-	public Dictionary<Direction, CellModel> Neighbors { get; set; } = new();
 }

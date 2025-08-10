@@ -11,10 +11,6 @@
     --grid-theme: "Standard";
 }
 
-:root:has(option[value="CTC"]:checked) {
-    --grid-theme: "CTC";
-}
-
 main {
     margin: 0 auto;
     padding: 4rem;
@@ -70,64 +66,5 @@ main {
 .cell[aria-selected="true"] {
     @container style(--grid-theme: "Standard") {
         --clr-cell-bg: #ddeada;
-    }
-
-    @container style(--grid-theme: "CTC") {
-        --clr-cell-bg: rgba(255, 255, 255, 0.5);
-        --clr-border: rgba(76, 175, 80, 0.5);
-
-        /* Border shadows */
-        box-shadow:
-                inset 0 var(--shadow-top, 0) 0 0 var(--clr-border),
-                inset var(--shadow-right, 0) 0 0 0 var(--clr-border),
-                inset 0 var(--shadow-bottom, 0) 0 0 var(--clr-border),
-                inset var(--shadow-left, 0) 0 0 0 var(--clr-border);
-
-        &.top {
-            --shadow-top: 8px;
-        }
-
-        &.right {
-            --shadow-right: -8px;
-        }
-
-        &.bottom {
-            --shadow-bottom: -8px;
-        }
-
-        &.left {
-            --shadow-left: 8px;
-        }
-
-        /* Corner shadows */
-        background-repeat: no-repeat;
-        background-size: 8px 8px;
-        background-image:
-                linear-gradient(var(--shadow-tl, transparent), var(--shadow-tl, transparent)),
-                linear-gradient(var(--shadow-tr, transparent), var(--shadow-tr, transparent)),
-                linear-gradient(var(--shadow-bl, transparent), var(--shadow-bl, transparent)),
-                linear-gradient(var(--shadow-br, transparent), var(--shadow-br, transparent));
-
-        background-position:
-                top left,
-                top right,
-                bottom left,
-                bottom right;
-
-        &.topleftcorner {
-            --shadow-tl: var(--clr-border);
-        }
-
-        &.toprightcorner {
-            --shadow-tr: var(--clr-border);
-        }
-
-        &.bottomleftcorner {
-            --shadow-bl: var(--clr-border);
-        }
-
-        &.bottomrightcorner {
-            --shadow-br: var(--clr-border);
-        }
     }
 }
