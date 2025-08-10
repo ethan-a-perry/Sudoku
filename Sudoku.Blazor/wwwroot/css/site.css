@@ -1,11 +1,18 @@
 @import "reset.css";
 
 :root {
+    --grid-theme: "Standard";
     --grid-size: 9;
     --cell-width: 90px;
     --cell-height: 90px;
-    
-    --clr-border-blue: #63a5ff;
+}
+
+:root:has(option[value="Standard"]:checked) {
+    --grid-theme: "Standard";
+}
+
+:root:has(option[value="CTC"]:checked) {
+    --grid-theme: "CTC";
 }
 
 main {
@@ -23,6 +30,8 @@ main {
     outline: 2px solid #444;
     user-select: none;
     cursor: pointer;
+    font-size: 3rem;
+    font-family: sans-serif;
 }
 
 .grid::before {
@@ -54,62 +63,71 @@ main {
     align-items: center;
     justify-content: center;
     outline: 1px solid #444;
-    background-color: white;
     color: #333;
-    
-    box-shadow:
-            inset 0 var(--shadow-top, 0) 0 0 var(--clr-border-blue),
-            inset var(--shadow-right, 0) 0 0 0 var(--clr-border-blue),
-            inset 0 var(--shadow-bottom, 0) 0 0 var(--clr-border-blue),
-            inset var(--shadow-left, 0) 0 0 0 var(--clr-border-blue);
-    
-    background-repeat: no-repeat;
-    background-size: 5px 5px;
-    background-image:
-            linear-gradient(var(--shadow-tl, transparent), var(--shadow-tl, transparent)),
-            linear-gradient(var(--shadow-tr, transparent), var(--shadow-tr, transparent)),
-            linear-gradient(var(--shadow-bl, transparent), var(--shadow-bl, transparent)),
-            linear-gradient(var(--shadow-br, transparent), var(--shadow-br, transparent));
-
-    background-position:
-            top left,
-            top right,
-            bottom left,
-            bottom right;
+    background-color: var(--clr-cell-bg, inherit);
 }
 
 .cell[aria-selected="true"] {
-    background-color: aliceblue;
-}
+    @container style(--grid-theme: "Standard") {
+        --clr-cell-bg: #ddeada;
+    }
 
-.cell.top {
-    --shadow-top: 5px;
-}
+    @container style(--grid-theme: "CTC") {
+        --clr-cell-bg: rgba(255, 255, 255, 0.5);
+        --clr-border: rgba(76, 175, 80, 0.5);
 
-.cell.right {
-    --shadow-right: -5px;
-}
+        /* Border shadows */
+        box-shadow:
+                inset 0 var(--shadow-top, 0) 0 0 var(--clr-border),
+                inset var(--shadow-right, 0) 0 0 0 var(--clr-border),
+                inset 0 var(--shadow-bottom, 0) 0 0 var(--clr-border),
+                inset var(--shadow-left, 0) 0 0 0 var(--clr-border);
 
-.cell.bottom {
-    --shadow-bottom: -5px;
-}
+        &.top {
+            --shadow-top: 8px;
+        }
 
-.cell.left {
-    --shadow-left: 5px;
-}
+        &.right {
+            --shadow-right: -8px;
+        }
 
-.cell.topleftcorner {
-    --shadow-tl: var(--clr-border-blue);
-}
+        &.bottom {
+            --shadow-bottom: -8px;
+        }
 
-.cell.toprightcorner {
-    --shadow-tr: var(--clr-border-blue);
-}
+        &.left {
+            --shadow-left: 8px;
+        }
 
-.cell.bottomleftcorner {
-    --shadow-bl: var(--clr-border-blue);
-}
+        /* Corner shadows */
+        background-repeat: no-repeat;
+        background-size: 8px 8px;
+        background-image:
+                linear-gradient(var(--shadow-tl, transparent), var(--shadow-tl, transparent)),
+                linear-gradient(var(--shadow-tr, transparent), var(--shadow-tr, transparent)),
+                linear-gradient(var(--shadow-bl, transparent), var(--shadow-bl, transparent)),
+                linear-gradient(var(--shadow-br, transparent), var(--shadow-br, transparent));
 
-.cell.bottomrightcorner {
-    --shadow-br: var(--clr-border-blue);
+        background-position:
+                top left,
+                top right,
+                bottom left,
+                bottom right;
+
+        &.topleftcorner {
+            --shadow-tl: var(--clr-border);
+        }
+
+        &.toprightcorner {
+            --shadow-tr: var(--clr-border);
+        }
+
+        &.bottomleftcorner {
+            --shadow-bl: var(--clr-border);
+        }
+
+        &.bottomrightcorner {
+            --shadow-br: var(--clr-border);
+        }
+    }
 }
