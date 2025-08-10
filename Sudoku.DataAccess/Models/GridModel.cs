@@ -165,26 +165,4 @@ public class GridModel
 			}
 		}
 	}
-
-	/// <summary>
-	/// Moves the current cell selection in the grid based on the user's arrow key input.
-	/// </summary>
-	public void TraverseGrid(string arrowKey) {
-		var lastSelectedCell = SelectedCells.GetLastSelected();
-		
-		// Wrap the selection to the opposite side of the grid if the user moves off the edge of the grid.
-		(Direction direction, (int row, int col) fallback) =
-			arrowKey switch {
-				"ArrowUp" => (Direction.Top, (Size - 1, lastSelectedCell.Col)),
-				"ArrowRight" => (Direction.Right, (lastSelectedCell.Row, 0)),
-				"ArrowDown" => (Direction.Bottom, (0, lastSelectedCell.Col)),
-				"ArrowLeft" => (Direction.Left, (lastSelectedCell.Row, Size - 1))
-			};
-
-		// Select neighbor or wrap around the grid if no neighbor exists.
-		SortSelection(lastSelectedCell.Neighbors.TryGetValue(direction, out var neighbor)
-			? neighbor
-			: Cells[fallback.row, fallback.col]
-		);
-	}
 }
