@@ -69,6 +69,22 @@ public class GridModel
 		}
 	}
 
+	public void SetGrid(string[,] grid) {
+		for (int row = 0; row < grid.GetLength(0); row++) {
+			for (int col = 0; col < grid.GetLength(1); col++) {
+				// s is your string of length 1 with a digit '1' to '9'
+				if (grid[row, col] is [>= '1' and <= '9'] s) {
+					Cells[row, col].Value = s[0];
+					Cells[row, col].IsGiven = true;
+				}
+				// If no digit is given, set the value to null
+				else {
+					Cells[row, col].Value = '\0';
+				}
+			}
+		}
+	}
+
 	/// <summary>
 	/// Place a character in the cell only if it doesn't alrady contain a given cell.
 	/// </summary>

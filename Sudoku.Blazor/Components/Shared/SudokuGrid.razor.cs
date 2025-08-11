@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
+using Sudoku.DataAccess.Data;
 using Sudoku.DataAccess.Enums;
 using Sudoku.DataAccess.Models;
 
@@ -7,7 +8,7 @@ namespace Sudoku.Blazor.Components.Shared;
 
 public partial class SudokuGrid : ComponentBase
 {
-    private GridModel Grid { get; set; } = new();
+    [Parameter] public GridModel Grid { get; set; } = new();
     private bool IsMouseDown { get; set; }
     private bool IsShiftKeyDown { get; set; }
     

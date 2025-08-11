@@ -1,7 +1,42 @@
 @page "/"
 
-@using Sudoku.Blazor.Components.Shared
-
 @rendermode InteractiveServer
 
-<SudokuGrid></SudokuGrid>
+@using Sudoku.Blazor.Components.Shared
+@using Sudoku.DataAccess.Data
+@using Sudoku.DataAccess.Models
+@using Sudoku.DataAccess.Services
+
+@inject IPuzzleData PuzzleData
+
+<SudokuGrid Grid="grid"></SudokuGrid>
+
+<ul>
+    @foreach (var puzzle in puzzles) {
+        <li @onclick="@(() => SelectPuzzle(puzzle))">@puzzle.Title by @puzzle.Constructor</li>
+    }
+</ul>
+
+<a @onclick="Solve">Check solution</a>
+
+@code {
+    private List<PuzzleModel> puzzles = [];
+    private GridModel grid = new();
+    private SudokuSolver sudokuSolver = new();
+    private bool isSolved;
+    
+    protected override async Task OnInitializedAsync() {
+        puzzles = await PuzzleData.GetAllPuzzles();
+        grid.SetGrid(puzzles.FirstOrDefault().Grid);
+    }
+    
+    private void SelectPuzzle(PuzzleModel puzzle) {
+        grid.SetGrid(puzzle.Grid);
+    }
+
+    private void Solve() {
+        if (sudokuSolver.IsSolved(grid.Cells)) {
+            isSolved = true;
+        }
+    }
+}
