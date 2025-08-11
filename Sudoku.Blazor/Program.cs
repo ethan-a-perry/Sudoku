@@ -1,10 +1,10 @@
+using Sudoku.Blazor;
 using Sudoku.Blazor.Components;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddRazorComponents()
-    .AddInteractiveServerComponents();
+builder.ConfigureServices();
 
 var app = builder.Build();
 
