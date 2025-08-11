@@ -1,14 +1,37 @@
+@using Sudoku.DataAccess.Enums
 <div class="grid" tabindex="-1" @onkeydown="OnKeyDown" @onkeyup="OnKeyUp" @onkeydown:preventDefault="true">
     @foreach (var cell in Grid.Cells) {
         var row = cell.Row;
         var col = cell.Col;
         <div
             class="cell"
-            aria-selected="@(Grid.Cells[row, col].IsSelected ? "true" : "false")"
+            aria-selected="@(cell.IsSelected ? "true" : "false")"
             @onmousedown="e => OnMouseDown(e, row, col)"
             @onmouseup="() => OnMouseUp()"
             @onmouseenter="() => OnMouseEnter(row, col)">
-            @Grid.Cells[row, col].Value
-        </div>
+        
+            @if (cell.Value is not '\0') {
+                @cell.Value
+            }
+            else {
+                if (cell.CornerPencilMarks.Count > 0) {
+                    int index = 1;
+                    <div class="pencil-marks corner">
+                        @foreach (var pencilMark in cell.CornerPencilMarks) {
+                            <span class="pencil-mark @($"p{index}")">@pencilMark</span>
+                            index++;
+                        }
+                    </div>
+                }
+                
+                if (cell.CenterPencilMarks.Count > 0) {
+                    <div class="pencil-marks center @(cell.CenterPencilMarks.Count == 8 ? "eight-digits" : "") @(cell.CenterPencilMarks.Count == 9 ? "nine-digits" : "")">
+                        @foreach (var pencilMark in cell.CenterPencilMarks) {
+                            <span class="pencil-mark">@pencilMark</span>
+                        }
+                    </div>
+                }
+            }
+    </div>
     }
 </div>

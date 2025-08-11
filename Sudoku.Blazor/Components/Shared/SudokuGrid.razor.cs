@@ -57,10 +57,18 @@ public partial class SudokuGrid : ComponentBase
 
         switch (e.Key) {
             case { Length: 1 }:
-                Grid.SetCell(e.Key.ToUpper()[0]);
+                Grid.SetCellValue(e.Key.ToUpper()[0]);
                 break;
             case "Backspace":
-                Grid.SetCell('\0');
+                Grid.UnsetCellValue('\0');
+                break;
+            case "Tab":
+                Grid.InputMode = Grid.InputMode switch {
+                    InputMode.Digit => InputMode.CenterPencilMark,
+                    InputMode.CenterPencilMark => InputMode.CornerPencilMark,
+                    InputMode.CornerPencilMark => InputMode.Digit,
+                    _ => throw new ArgumentOutOfRangeException()
+                };
                 break;
         }
     }

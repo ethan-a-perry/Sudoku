@@ -1,4 +1,5 @@
 using Sudoku.DataAccess.Enums;
+using Sudoku.DataAccess.Helpers;
 
 namespace Sudoku.DataAccess.Models;
 
@@ -7,6 +8,8 @@ public class GridModel
 	public int Size { get; set; } = 9;
 	public CellModel?[,] Cells { get; set; }
 	public GridMode Mode { get; set; } = GridMode.Regular;
+
+	public InputMode InputMode { get; set; } = InputMode.Digit;
 	
 	/// <summary>
 	/// Custom LinkedHashSet that preserves insertion order.
@@ -16,14 +19,12 @@ public class GridModel
 	public GridModel()
 	{
 		Cells = new CellModel[Size, Size];
+		var comparer = new PencilMarkComparer();
 		
 		// Initialize the grid by creating an empty CellModel for each position.
 		for (int row = 0; row < Size; row++) {
 			for (int col = 0; col < Size; col++) {
-				Cells[row, col] = new CellModel {
-					Row = row,
-					Col = col
-				};
+				Cells[row, col] = new CellModel(row, col);
 			}
 		}
 	}
@@ -86,12 +87,50 @@ public class GridModel
 	}
 
 	/// <summary>
-	/// Place a character in the cell only if it doesn't alrady contain a given cell.
+	/// Removes digits, then corner penicl marks, then center pencil
+	/// marks in that order unless overridden by the InputMode
 	/// </summary>
-	public void SetCell(char value) {
+	public void UnsetCellValue(char delete) {
 		foreach (var cell in SelectedCells) {
-			if (!cell.IsGiven) {
-				cell.Value = value;
+			if (cell.IsGiven) return;
+
+			if (cell.Value is not '\0') {
+				cell.Value = delete;
+				return;
+			}
+			
+			if (cell.CornerPencilMarks.Count > 0 && (InputMode is not InputMode.CenterPencilMark || cell.CenterPencilMarks.Count == 0)) { 
+				cell.CornerPencilMarks.Clear();
+				return;
+			}
+
+			cell.CenterPencilMarks.Clear();
+		}
+	}
+	
+	public void SetCellValue(char value) {
+		foreach (var cell in SelectedCells) {
+			if (cell.IsGiven) return;
+
+			if (cell.Value == value) {
+				cell.Value = '\0';
+				return;
+			}
+			
+			switch (InputMode) {
+				case InputMode.Digit:
+					cell.Value = value;
+					break;
+				case InputMode.CornerPencilMark:
+					if (!cell.AddPencilMark(cell.CornerPencilMarks, value)) {
+						cell.CornerPencilMarks.Remove(value);
+					}
+					break;
+				case InputMode.CenterPencilMark:
+					if (!cell.AddPencilMark(cell.CenterPencilMarks, value)) {
+						cell.CenterPencilMarks.Remove(value);
+					}
+					break;
 			}
 		}
 	}
