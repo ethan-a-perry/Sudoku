@@ -51,13 +51,10 @@ public partial class SudokuGrid : ComponentBase
         Grid.SortSelection(Grid.Cells[row, col]);
     }
 
-    private void OnKeyDown(KeyboardEventArgs e) {
-        // If the shiftkey is pressed, Select or Delete mode can be activated.
-        IsShiftKeyDown = e.ShiftKey;
-
-        switch (e.Key) {
+    private void HandleSelection(string selection) {
+        switch (selection) {
             case { Length: 1 }:
-                Grid.SetCellValue(e.Key.ToUpper()[0]);
+                Grid.SetCellValue(selection.ToUpper()[0]);
                 break;
             case "Backspace":
                 Grid.UnsetCellValue('\0');
@@ -71,6 +68,12 @@ public partial class SudokuGrid : ComponentBase
                 };
                 break;
         }
+    }
+
+    private void OnKeyDown(KeyboardEventArgs e) {
+        // If the shiftkey is pressed, Select or Delete mode can be activated.
+        IsShiftKeyDown = e.ShiftKey;
+        HandleSelection(e.Key);
     }
 
     private void OnKeyUp(KeyboardEventArgs e) {

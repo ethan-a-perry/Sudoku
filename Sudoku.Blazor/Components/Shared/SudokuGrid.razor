@@ -32,6 +32,14 @@
                     </div>
                 }
             }
-    </div>
+        </div>
+    }
+</div>
+
+
+<div class="digits">
+    @for (int i = 1; i <= 9; i++) {
+        var i1 = i;
+        <button class="digit" @onclick="() => HandleSelection(i1.ToString())">@i1</button>
     }
 </div>
