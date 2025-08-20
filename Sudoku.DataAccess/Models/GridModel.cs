@@ -81,6 +81,7 @@ public class GridModel
 				// If no digit is given, set the value to null
 				else {
 					Cells[row, col].Value = '\0';
+					Cells[row, col].IsGiven = false;
 				}
 			}
 		}
@@ -92,16 +93,16 @@ public class GridModel
 	/// </summary>
 	public void UnsetCellValue(char delete) {
 		foreach (var cell in SelectedCells) {
-			if (cell.IsGiven) return;
+			if (cell.IsGiven) continue;
 
 			if (cell.Value is not '\0') {
 				cell.Value = delete;
-				return;
+				continue;
 			}
 			
 			if (cell.CornerPencilMarks.Count > 0 && (InputMode is not InputMode.CenterPencilMark || cell.CenterPencilMarks.Count == 0)) { 
 				cell.CornerPencilMarks.Clear();
-				return;
+				continue;
 			}
 
 			cell.CenterPencilMarks.Clear();
@@ -110,11 +111,11 @@ public class GridModel
 	
 	public void SetCellValue(char value) {
 		foreach (var cell in SelectedCells) {
-			if (cell.IsGiven) return;
+			if (cell.IsGiven) continue;
 
 			if (cell.Value == value) {
 				cell.Value = '\0';
-				return;
+				continue;
 			}
 			
 			switch (InputMode) {
