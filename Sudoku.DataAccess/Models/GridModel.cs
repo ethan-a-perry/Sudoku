@@ -1,3 +1,4 @@
+using System.Data;
 using Sudoku.DataAccess.Enums;
 using Sudoku.DataAccess.Helpers;
 
@@ -11,15 +12,13 @@ public class GridModel
 
 	public InputMode InputMode { get; set; } = InputMode.Digit;
 	
-	/// <summary>
-	/// Custom LinkedHashSet that preserves insertion order.
-	/// </summary>
 	public LinkedHashSet<CellModel>SelectedCells { get; set; } = [];
+
+	public List<List<(int Row, int Col, char? Value)>> Moves { get; set; } = [];
 
 	public GridModel()
 	{
 		Cells = new CellModel[Size, Size];
-		var comparer = new PencilMarkComparer();
 		
 		// Initialize the grid by creating an empty CellModel for each position.
 		for (int row = 0; row < Size; row++) {
@@ -133,6 +132,34 @@ public class GridModel
 					}
 					break;
 			}
+		}
+	}
+	
+	public void TakeSnapshot() {
+		// Convert SelectedCells into a list of tuples, preserving insertion order
+		var snapshot = SelectedCells
+			.Select(cell => (cell.Row, cell.Col, cell.Value))
+			.ToList();
+
+		Moves.Add(snapshot);
+
+		// Keep only the latest 16 snapshots
+		if (Moves.Count > 16) {
+			Moves.RemoveAt(0);
+		}
+	}
+	
+	public void RestoreSnapshot() {
+		if (Moves.Count == 0)
+			return;
+		
+		var snapshot = Moves[^1];
+		Moves.RemoveAt(Moves.Count - 1);
+		
+		DeselectAllCells();
+		foreach (var cell in snapshot) {
+			SelectCell(Cells[cell.Row, cell.Col]);
+			Cells[cell.Row, cell.Col].Value = cell.Value;
 		}
 	}
 }

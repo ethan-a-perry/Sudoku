@@ -54,9 +54,11 @@ public partial class SudokuGrid : ComponentBase
     private void HandleSelection(string selection) {
         switch (selection) {
             case { Length: 1 }:
+                Grid.TakeSnapshot();
                 Grid.SetCellValue(selection.ToUpper()[0]);
                 break;
             case "Backspace":
+                Grid.TakeSnapshot();
                 Grid.UnsetCellValue('\0');
                 break;
             case "Tab":

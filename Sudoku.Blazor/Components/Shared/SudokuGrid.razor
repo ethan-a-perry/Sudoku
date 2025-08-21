@@ -36,6 +36,7 @@
     }
 </div>
 
+<button @onclick="Grid.RestoreSnapshot">Undo</button>
 
 <div class="digits">
     @for (int i = 1; i <= 9; i++) {
@@ -43,3 +44,7 @@
         <button class="digit" @onclick="() => HandleSelection(i1.ToString())">@i1</button>
     }
 </div>
+
+@foreach (var c in Grid.Moves) {
+    <p>@c.ToString()</p>
+}
