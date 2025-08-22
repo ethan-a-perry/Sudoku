@@ -1,41 +1,29 @@
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
-using Sudoku.DataAccess.Data;
-using Sudoku.DataAccess.Enums;
-using Sudoku.DataAccess.Models;
+using Sudoku.Blazor.Services;
+using Sudoku.Core.Models;
 
 namespace Sudoku.Blazor.Components.Shared;
 
 public partial class SudokuGrid : ComponentBase
 {
-    [Parameter] public GridModel Grid { get; set; } = new();
+    [Inject] private SelectionManager SelectionManager { get; set; }
+    [Inject] private InputManager InputManager { get; set; }
+    [Parameter] public Grid Grid { get; set; } = new(9, 9);
     private bool IsMouseDown { get; set; }
     private bool IsShiftKeyDown { get; set; }
     
-    /// <summary>
-    /// Checks when a mouse is pressed down, not necessarily clicked.
-    /// </summary>
     private void OnMouseDown(MouseEventArgs e, int row, int col) {
         // If the user right-clicks or opens the context menu, restrict grid interactivity.
         if (e.Button != 0) return;
-        
         IsMouseDown = true;
         
-        // See GridMode.cs for info about the various grid modes.
-        if (IsShiftKeyDown) {
-            Grid.Mode = Grid.Cells[row, col].IsSelected switch {
-                true => GridMode.Delete,
-                false => GridMode.Select
-            };
-        }
-        
-        // Figure out of a cell is selected or deselected.
-        Grid.SortSelection(Grid.Cells[row, col]);
+        SelectionManager.HandleMouseDown(Grid.Cells[row, col], IsShiftKeyDown);
     }
     
     private void OnMouseUp() {
         IsMouseDown = false;
-        Grid.Mode = GridMode.Regular;
+        SelectionManager.HandleMouseUp();
     }
     
     /// <summary>
@@ -43,41 +31,15 @@ public partial class SudokuGrid : ComponentBase
     /// </summary>
     private void OnMouseEnter(int row, int col) {
         if (!IsMouseDown) return;
-
-        if (Grid.Mode == GridMode.Regular) {
-            Grid.Mode = GridMode.Select;
-        }
-        
-        Grid.SortSelection(Grid.Cells[row, col]);
+        SelectionManager.HandleMouseEnter(Grid.Cells[row, col]);
     }
-
-    private void HandleSelection(string selection) {
-        switch (selection) {
-            case { Length: 1 }:
-                Grid.TakeSnapshot();
-                Grid.SetCellValue(selection.ToUpper()[0]);
-                break;
-            case "Backspace":
-                Grid.TakeSnapshot();
-                Grid.UnsetCellValue('\0');
-                break;
-            case "Tab":
-                Grid.InputMode = Grid.InputMode switch {
-                    InputMode.Digit => InputMode.CenterPencilMark,
-                    InputMode.CenterPencilMark => InputMode.CornerPencilMark,
-                    InputMode.CornerPencilMark => InputMode.Digit,
-                    _ => throw new ArgumentOutOfRangeException()
-                };
-                break;
-        }
-    }
-
+    
     private void OnKeyDown(KeyboardEventArgs e) {
         // If the shiftkey is pressed, Select or Delete mode can be activated.
         IsShiftKeyDown = e.ShiftKey;
-        HandleSelection(e.Key);
+        InputManager.FilterInput(Grid, e.Key);
     }
-
+    
     private void OnKeyUp(KeyboardEventArgs e) {
         IsShiftKeyDown = e.ShiftKey;
     }

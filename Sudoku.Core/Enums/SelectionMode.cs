@@ -1,4 +1,4 @@
-namespace Sudoku.DataAccess.Enums;
+namespace Sudoku.Core.Enums;
 
 /// <summary>
 /// Specifies various grid states which dictate how cells are toggled.
@@ -8,7 +8,7 @@ namespace Sudoku.DataAccess.Enums;
 /// Select: Only unselected cells may be toggled.
 /// Delete: Only selected cells may be toggled.
 /// </remarks>
-public enum GridMode
+public enum SelectionMode
 {
     Regular,
     Select,

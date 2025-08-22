@@ -1,11 +1,10 @@
-@using Sudoku.DataAccess.Enums
 <div class="grid" tabindex="-1" @onkeydown="OnKeyDown" @onkeyup="OnKeyUp" @onkeydown:preventDefault="true">
     @foreach (var cell in Grid.Cells) {
         var row = cell.Row;
         var col = cell.Col;
         <div
             class="cell"
-            aria-selected="@(cell.IsSelected ? "true" : "false")"
+            aria-selected="@(SelectionManager.IsCellSelected(cell) ? "true" : "false")"
             @onmousedown="e => OnMouseDown(e, row, col)"
             @onmouseup="() => OnMouseUp()"
             @onmouseenter="() => OnMouseEnter(row, col)">
@@ -14,19 +13,19 @@
                 @cell.Value
             }
             else {
-                if (cell.CornerPencilMarks.Count > 0) {
+                if (cell.PencilMarks.Corner.Count > 0) {
                     int index = 1;
                     <div class="pencil-marks corner">
-                        @foreach (var pencilMark in cell.CornerPencilMarks) {
+                        @foreach (var pencilMark in cell.PencilMarks.Corner) {
                             <span class="pencil-mark @($"p{index}")">@pencilMark</span>
                             index++;
                         }
                     </div>
                 }
                 
-                if (cell.CenterPencilMarks.Count > 0) {
-                    <div class="pencil-marks center @(cell.CenterPencilMarks.Count == 8 ? "eight-digits" : "") @(cell.CenterPencilMarks.Count == 9 ? "nine-digits" : "")">
-                        @foreach (var pencilMark in cell.CenterPencilMarks) {
+                if (cell.PencilMarks.Center.Count > 0) {
+                    <div class="pencil-marks center @(cell.PencilMarks.Center.Count == 8 ? "eight-digits" : "") @(cell.PencilMarks.Center.Count == 9 ? "nine-digits" : "")">
+                        @foreach (var pencilMark in cell.PencilMarks.Center) {
                             <span class="pencil-mark">@pencilMark</span>
                         }
                     </div>
@@ -36,15 +35,11 @@
     }
 </div>
 
-<button @onclick="Grid.RestoreSnapshot">Undo</button>
+@* <button @onclick="Grid.RestoreSnapshot">Undo</button> *@
 
 <div class="digits">
     @for (int i = 1; i <= 9; i++) {
         var i1 = i;
-        <button class="digit" @onclick="() => HandleSelection(i1.ToString())">@i1</button>
+        <button class="digit" @onclick="() => InputManager.FilterInput(Grid, i1.ToString())">@i1</button>
     }
 </div>
-
-@foreach (var c in Grid.Moves) {
-    <p>@c.ToString()</p>
-}

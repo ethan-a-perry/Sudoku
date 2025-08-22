@@ -1,4 +1,4 @@
-namespace Sudoku.DataAccess.Enums;
+namespace Sudoku.Core.Enums;
 
 public enum InputMode
 {

@@ -6,6 +6,7 @@
 @using Sudoku.DataAccess.Data
 @using Sudoku.DataAccess.Models
 @using Sudoku.DataAccess.Services
+@using Sudoku.Core.Models
 
 @inject IPuzzleData PuzzleData
 
@@ -21,17 +22,17 @@
 
 @code {
     private List<PuzzleModel> puzzles = [];
-    private GridModel grid = new();
+    private Grid grid = new(9, 9);
     private SudokuSolver sudokuSolver = new();
     private bool isSolved;
     
     protected override async Task OnInitializedAsync() {
         puzzles = await PuzzleData.GetAllPuzzles();
-        grid.SetGrid(puzzles.FirstOrDefault().Grid);
+        grid.InitializePuzzle(puzzles.FirstOrDefault().Grid);
     }
     
     private void SelectPuzzle(PuzzleModel puzzle) {
-        grid.SetGrid(puzzle.Grid);
+        grid.InitializePuzzle(puzzle.Grid);
     }
 
     private void Solve() {

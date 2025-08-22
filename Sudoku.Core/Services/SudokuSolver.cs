@@ -1,4 +1,4 @@
-using Sudoku.DataAccess.Models;
+using Sudoku.Core.Models;
 
 namespace Sudoku.DataAccess.Services;
 
@@ -9,7 +9,7 @@ public class SudokuSolver
     public int BoxRows { get; set; } = 3;
     public int BoxCols { get; set; } = 3;
     
-    public bool IsSolved(CellModel[,] cells) {
+    public bool IsSolved(Cell[,] cells) {
         HashSet<string> seen = [];
 
         for (int r = 0; r < GridRows; r++) {

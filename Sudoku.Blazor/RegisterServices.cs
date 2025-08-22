@@ -1,3 +1,5 @@
+using Sudoku.Blazor.Services;
+using Sudoku.Core.Models;
 using Sudoku.DataAccess.Data;
 using Sudoku.DataAccess.DataAccess;
 
@@ -12,5 +14,7 @@ public static class RegisterServices
 
         builder.Services.AddSingleton<IDbConnection, DbConnection>();
         builder.Services.AddSingleton<IPuzzleData, MongoPuzzleData>();
+        builder.Services.AddScoped<SelectionManager>();
+        builder.Services.AddScoped<InputManager>();
     }
 }
