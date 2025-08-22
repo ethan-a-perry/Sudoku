@@ -36,6 +36,10 @@ public class Grid
             cell.Value = value;
         }
     }
+    
+    public void SetDigit(Cell cell, char value) {
+        cell.Value = value;
+    }
 
     public void UnsetDigit(IEnumerable<Cell> cells) {
         foreach (Cell cell in cells) {

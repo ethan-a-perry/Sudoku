@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 using Sudoku.Blazor.Services;
 using Sudoku.Core.Models;
+using Sudoku.DataAccess.Services;
 
 namespace Sudoku.Blazor.Components.Shared;
 
@@ -10,6 +11,7 @@ public partial class SudokuGrid : ComponentBase
     [Inject] private SelectionManager SelectionManager { get; set; }
     [Inject] private InputManager InputManager { get; set; }
     [Parameter] public Grid Grid { get; set; } = new(9, 9);
+    private SnapshotManager SnapshotManager { get; set; } = new();
     private bool IsMouseDown { get; set; }
     private bool IsShiftKeyDown { get; set; }
     
@@ -42,5 +44,13 @@ public partial class SudokuGrid : ComponentBase
     
     private void OnKeyUp(KeyboardEventArgs e) {
         IsShiftKeyDown = e.ShiftKey;
+    }
+
+    private void OnUndo() {
+        SnapshotManager.Undo();
+    }
+
+    private void OnRedo() {
+        SnapshotManager.Redo();
     }
 }

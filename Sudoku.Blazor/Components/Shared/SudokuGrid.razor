@@ -35,7 +35,8 @@
     }
 </div>
 
-@* <button @onclick="Grid.RestoreSnapshot">Undo</button> *@
+<button @onclick="() => InputManager.Undo(Grid)">Undo</button>
+<button @onclick="() => InputManager.Redo(Grid)">Redo</button>
 
 <div class="digits">
     @for (int i = 1; i <= 9; i++) {
