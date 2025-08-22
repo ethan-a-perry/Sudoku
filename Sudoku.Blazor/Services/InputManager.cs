@@ -5,18 +5,18 @@ using Sudoku.DataAccess.Services;
 
 namespace Sudoku.Blazor.Services;
 
-public class InputManager(SelectionManager selectionManager)
+public class InputManager(Grid grid, SelectionManager selectionManager)
 {
     public InputMode Mode { get; set; } = InputMode.Digit;
     public SnapshotManager SnapshotManager { get; set; } = new();
 
-    public void FilterInput(Grid grid, string input) {
+    public void FilterInput(string input) {
         switch (input) {
             case { Length: 1 }:
-                HandleSet(grid, input.ToUpper()[0]);
+                HandleSet(input.ToUpper()[0]);
                 break;
             case "Backspace":
-                HandleUnset(grid);
+                HandleUnset();
                 break;
             case "Tab":
                 Mode = Mode switch {
@@ -29,7 +29,7 @@ public class InputManager(SelectionManager selectionManager)
         }
     }
 
-    public void HandleSet(Grid grid, char input) {
+    public void HandleSet(char input) {
         var editableCells = selectionManager.EditableCells;
         RecordSnapshot(() => {
             switch (Mode) {
@@ -61,7 +61,7 @@ public class InputManager(SelectionManager selectionManager)
         });
     }
 
-    public void HandleUnset(Grid grid) {
+    public void HandleUnset() {
         var editableCells = selectionManager.EditableCells;
         RecordSnapshot(() => {
             // If any cells have Digits, remove then return
@@ -95,7 +95,7 @@ public class InputManager(SelectionManager selectionManager)
         SnapshotManager.Record(new Snapshot(before, after));
     }
     
-    public void RestoreSnapshot(Grid grid, List<CellState> cellStates) {
+    public void RestoreSnapshot(List<CellState> cellStates) {
         selectionManager.DeselectAllCells();
         
         foreach (var cellState in cellStates) {
@@ -107,13 +107,13 @@ public class InputManager(SelectionManager selectionManager)
         }
     }
 	
-    public void Undo(Grid grid) {
+    public void Undo() {
         var snapshot = SnapshotManager.Undo();
-        RestoreSnapshot(grid, snapshot.Before);
+        RestoreSnapshot(snapshot.Before);
     }
 	
-    public void Redo(Grid grid) {
+    public void Redo() {
         var snapshot = SnapshotManager.Redo();
-        RestoreSnapshot(grid, snapshot.After);
+        RestoreSnapshot(snapshot.After);
     }
 }

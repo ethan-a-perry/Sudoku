@@ -8,10 +8,9 @@ namespace Sudoku.Blazor.Components.Shared;
 
 public partial class SudokuGrid : ComponentBase
 {
+    [Inject] private Grid Grid { get; set; }
     [Inject] private SelectionManager SelectionManager { get; set; }
     [Inject] private InputManager InputManager { get; set; }
-    [Parameter] public Grid Grid { get; set; } = new(9, 9);
-    private SnapshotManager SnapshotManager { get; set; } = new();
     private bool IsMouseDown { get; set; }
     private bool IsShiftKeyDown { get; set; }
     
@@ -39,18 +38,10 @@ public partial class SudokuGrid : ComponentBase
     private void OnKeyDown(KeyboardEventArgs e) {
         // If the shiftkey is pressed, Select or Delete mode can be activated.
         IsShiftKeyDown = e.ShiftKey;
-        InputManager.FilterInput(Grid, e.Key);
+        InputManager.FilterInput(e.Key);
     }
     
     private void OnKeyUp(KeyboardEventArgs e) {
         IsShiftKeyDown = e.ShiftKey;
-    }
-
-    private void OnUndo() {
-        SnapshotManager.Undo();
-    }
-
-    private void OnRedo() {
-        SnapshotManager.Redo();
     }
 }

@@ -9,8 +9,9 @@
 @using Sudoku.Core.Models
 
 @inject IPuzzleData PuzzleData
+@inject Grid Grid
 
-<SudokuGrid Grid="grid"></SudokuGrid>
+<SudokuGrid></SudokuGrid>
 
 <ul>
     @foreach (var puzzle in puzzles) {
@@ -22,21 +23,20 @@
 
 @code {
     private List<PuzzleModel> puzzles = [];
-    private Grid grid = new(9, 9);
     private SudokuSolver sudokuSolver = new();
     private bool isSolved;
     
     protected override async Task OnInitializedAsync() {
         puzzles = await PuzzleData.GetAllPuzzles();
-        grid.InitializePuzzle(puzzles.FirstOrDefault().Grid);
+        Grid.InitializePuzzle(puzzles.FirstOrDefault().Grid);
     }
     
     private void SelectPuzzle(PuzzleModel puzzle) {
-        grid.InitializePuzzle(puzzle.Grid);
+        Grid.InitializePuzzle(puzzle.Grid);
     }
 
     private void Solve() {
-        if (sudokuSolver.IsSolved(grid.Cells)) {
+        if (sudokuSolver.IsSolved(Grid.Cells)) {
             isSolved = true;
         }
     }
