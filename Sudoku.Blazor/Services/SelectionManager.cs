@@ -9,7 +9,7 @@ namespace Sudoku.Blazor.Services;
 public class SelectionManager
 {
     public SelectionMode Mode { get; set; } = SelectionMode.Regular;
-    public LinkedHashSet<Cell> SelectedCells { get; private set; } = [];
+    private LinkedHashSet<Cell> SelectedCells { get; set; } = [];
     public IEnumerable<Cell> EditableCells => SelectedCells.Where(c => !c.IsGiven);
     
     public bool IsCellSelected(Cell cell) => SelectedCells.Contains(cell);
