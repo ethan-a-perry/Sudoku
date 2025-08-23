@@ -5,10 +5,10 @@ using Sudoku.DataAccess.Services;
 
 namespace Sudoku.Blazor.Services;
 
-public class InputManager(Grid grid, SelectionManager selectionManager)
+public class InputManager(Grid grid, SelectionManager selectionManager, UndoRedoService undoRedoService)
 {
     public InputMode Mode { get; set; } = InputMode.Digit;
-    public SnapshotManager SnapshotManager { get; set; } = new();
+    public IEnumerable<Cell> EditableCells => selectionManager.EditableCells;
 
     public void FilterInput(string input) {
         switch (input) {
@@ -42,31 +42,30 @@ public class InputManager(Grid grid, SelectionManager selectionManager)
     }
 
     public void HandleSet(char input) {
-        var editableCells = selectionManager.EditableCells;
-        RecordSnapshot(() => {
+        undoRedoService.RecordSnapshot(() => {
             switch (Mode) {
                 case InputMode.Digit:
-                    if (editableCells.All(c => c.Value == input)) {
-                        grid.UnsetDigit(editableCells);
+                    if (EditableCells.All(c => c.Value == input)) {
+                        grid.UnsetDigit(EditableCells);
                     }
                     else {
-                        grid.SetDigit(editableCells, input);
+                        grid.SetDigit(EditableCells, input);
                     }
                     break;
                 case InputMode.CornerPencilMark:
-                    if (editableCells.All(c => c.PencilMarks.Corner.Contains(input))) {
-                        grid.UnsetCornerPencilMark(editableCells, input);
+                    if (EditableCells.All(c => c.PencilMarks.Corner.Contains(input))) {
+                        grid.UnsetCornerPencilMark(EditableCells, input);
                     }
                     else {
-                        grid.SetCornerPencilMark(editableCells, input);
+                        grid.SetCornerPencilMark(EditableCells, input);
                     }
                     break;
                 case InputMode.CenterPencilMark:
-                    if (editableCells.All(c => c.PencilMarks.Center.Contains(input))) {
-                        grid.UnsetCenterPencilMark(editableCells, input);
+                    if (EditableCells.All(c => c.PencilMarks.Center.Contains(input))) {
+                        grid.UnsetCenterPencilMark(EditableCells, input);
                     }
                     else {
-                        grid.SetCenterPencilMark(editableCells, input);
+                        grid.SetCenterPencilMark(EditableCells, input);
                     }
                     break;
             }
@@ -74,58 +73,25 @@ public class InputManager(Grid grid, SelectionManager selectionManager)
     }
 
     public void HandleUnset() {
-        var editableCells = selectionManager.EditableCells;
-        RecordSnapshot(() => {
+        undoRedoService.RecordSnapshot(() => {
             // If any cells have Digits, remove then return
-            if (editableCells.Any(c => c.Value is not '\0')) {
-                grid.UnsetDigit(editableCells);
+            if (EditableCells.Any(c => c.Value is not '\0')) {
+                grid.UnsetDigit(EditableCells);
                 return;
             }
         
             // If any of the cells have corner pencil marks,
             // check if the input mode is not a CenterPencilMark or if no center pencil marks exist.
             // If these pass, remove corner pencil marks
-            if (editableCells.Any(c => c.PencilMarks.Corner.Count > 0)) {
-                if (Mode is not InputMode.CenterPencilMark || editableCells.Any(c => c.PencilMarks.Center.Count == 0)) { 
-                    grid.UnsetCornerPencilMarks(editableCells);
+            if (EditableCells.Any(c => c.PencilMarks.Corner.Count > 0)) {
+                if (Mode is not InputMode.CenterPencilMark || EditableCells.Any(c => c.PencilMarks.Center.Count == 0)) { 
+                    grid.UnsetCornerPencilMarks(EditableCells);
                     return;
                 }
             }
         
             // Remove all center pencil marks
-            grid.UnsetCenterPencilMarks(selectionManager.EditableCells);
+            grid.UnsetCenterPencilMarks(EditableCells);
         });
-    }
-    
-    public void RecordSnapshot(Action applyInput) {
-        var before = selectionManager.EditableCells.Select(CellState.FromCell).ToList();
-        
-        applyInput();
-        
-        var after = selectionManager.EditableCells.Select(CellState.FromCell).ToList();
-
-        SnapshotManager.Record(new Snapshot(before, after));
-    }
-    
-    public void RestoreSnapshot(List<CellState> cellStates) {
-        selectionManager.DeselectAllCells();
-        
-        foreach (var cellState in cellStates) {
-            var cell = grid.Cells[cellState.Row, cellState.Col];
-            char value = cellState.Value;
-            
-            selectionManager.SelectCell(cell);
-            grid.SetDigit(cell, value);
-        }
-    }
-	
-    public void Undo() {
-        var snapshot = SnapshotManager.Undo();
-        RestoreSnapshot(snapshot.Before);
-    }
-	
-    public void Redo() {
-        var snapshot = SnapshotManager.Redo();
-        RestoreSnapshot(snapshot.After);
     }
 }

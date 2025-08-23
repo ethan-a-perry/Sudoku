@@ -16,6 +16,7 @@ public static class RegisterServices
         builder.Services.AddSingleton<IPuzzleData, MongoPuzzleData>();
 
         builder.Services.AddScoped<Grid>(provider => new Grid(9, 9));
+        builder.Services.AddScoped<UndoRedoService>();
         builder.Services.AddScoped<SelectionManager>();
         builder.Services.AddScoped<InputManager>();
     }

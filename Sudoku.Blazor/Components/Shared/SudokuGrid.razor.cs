@@ -9,6 +9,7 @@ namespace Sudoku.Blazor.Components.Shared;
 public partial class SudokuGrid : ComponentBase
 {
     [Inject] private Grid Grid { get; set; }
+    [Inject] private UndoRedoService UndoRedoService { get; set; }
     [Inject] private SelectionManager SelectionManager { get; set; }
     [Inject] private InputManager InputManager { get; set; }
     private bool IsMouseDown { get; set; }
@@ -43,15 +44,15 @@ public partial class SudokuGrid : ComponentBase
         switch (e.Key.ToLowerInvariant()) {
             // Ctrl+Y or Cmd+Y
             case "y" when e.CtrlKey || e.MetaKey:
-                InputManager.Redo();
+                UndoRedoService.Redo();
                 return;
             // Ctrl+Z or Cmd+Z
             case "z" when e.CtrlKey || e.MetaKey && !e.ShiftKey:
-                InputManager.Undo();
+                UndoRedoService.Undo();
                 return;
             // Cmd+Shift+Z
             case "z" when e.MetaKey && e.ShiftKey:
-                InputManager.Redo();
+                UndoRedoService.Redo();
                 return;
         }
         

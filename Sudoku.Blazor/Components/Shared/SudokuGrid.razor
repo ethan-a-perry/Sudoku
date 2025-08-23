@@ -35,8 +35,8 @@
     }
 </div>
 
-<button @onclick="() => InputManager.Undo()">Undo</button>
-<button @onclick="() => InputManager.Redo()">Redo</button>
+<button @onclick="() => UndoRedoService.Undo()">Undo</button>
+<button @onclick="() => UndoRedoService.Redo()">Redo</button>
 
 <div class="digits @InputManager.Mode.ToString().ToLower()">
     @for (int i = 1; i <= 9; i++) {
