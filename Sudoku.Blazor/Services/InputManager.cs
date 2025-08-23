@@ -26,6 +26,18 @@ public class InputManager(Grid grid, SelectionManager selectionManager)
                     _ => throw new ArgumentOutOfRangeException()
                 };
                 break;
+            case "ArrowUp":
+                selectionManager.TraverseGrid(grid.Cells, -1, 0);
+                break;
+            case "ArrowRight":
+                selectionManager.TraverseGrid(grid.Cells, 0, 1);
+                break;
+            case "ArrowDown":
+                selectionManager.TraverseGrid(grid.Cells, 1, 0);
+                break;
+            case "ArrowLeft":
+                selectionManager.TraverseGrid(grid.Cells, 0, -1);
+                break;
         }
     }
 

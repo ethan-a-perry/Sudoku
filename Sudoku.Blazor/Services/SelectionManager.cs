@@ -1,12 +1,13 @@
 using Sudoku.Core.Enums;
 using Sudoku.Core.Models;
+using Sudoku.DataAccess;
 
 namespace Sudoku.Blazor.Services;
 
 public class SelectionManager
 {
     public SelectionMode Mode { get; set; } = SelectionMode.Regular;
-    public HashSet<Cell> SelectedCells { get; private set; } = [];
+    public LinkedHashSet<Cell> SelectedCells { get; private set; } = [];
     public IEnumerable<Cell> EditableCells => SelectedCells.Where(c => !c.IsGiven);
     
     public bool IsCellSelected(Cell cell) => SelectedCells.Contains(cell);
@@ -56,5 +57,15 @@ public class SelectionManager
         }
         
         FilterSelection(cell);
+    }
+
+    public void TraverseGrid(Cell[,] cells, int deltaRow, int deltaCol) {
+        var lastCellSelected = SelectedCells.Last();
+        
+        int newRow = (lastCellSelected.Row + deltaRow + cells.GetLength(1)) % cells.GetLength(1);
+        int newCol = (lastCellSelected.Col + deltaCol + cells.GetLength(0)) % cells.GetLength(0);
+        
+        DeselectAllCells();
+        SelectCell(cells[newRow, newCol]);
     }
 }
