@@ -38,9 +38,11 @@
 <button @onclick="() => InputManager.Undo()">Undo</button>
 <button @onclick="() => InputManager.Redo()">Redo</button>
 
-<div class="digits">
+<div class="digits @InputManager.Mode.ToString().ToLower()">
     @for (int i = 1; i <= 9; i++) {
-        var i1 = i;
-        <button class="digit" @onclick="() => InputManager.FilterInput(i1.ToString())">@i1</button>
+        var index = i;
+        <button @onclick="() => InputManager.FilterInput(index.ToString())">
+            <span class="@("p" + i)">@i</span>
+        </button>
     }
 </div>

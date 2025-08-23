@@ -121,3 +121,59 @@ main {
         }
     }
 }
+
+.digits {
+    max-width: 200px;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 1rem;
+
+    & button {
+        aspect-ratio: 1/1;
+        border: 1px solid black;
+        background: aliceblue;
+        outline: none;
+        border-radius: 5px;
+        cursor: pointer;
+
+        & span {
+            display: grid;
+            place-items: center;
+            overflow: hidden;
+        }
+    }
+}
+
+.digits.cornerpencilmark button {
+    display: grid;
+    grid-auto-columns: 1fr 1fr 1fr;
+    grid-template-rows: 1fr 1fr 1fr;
+    grid-template-areas:
+            "p1 p2 p3"
+            "p4 p5 p6"
+            "p7 p8 p9";
+
+    & .p1 { grid-area: p1; }
+    & .p2 { grid-area: p2; }
+    & .p3 { grid-area: p3; }
+    & .p4 { grid-area: p4; }
+    & .p5 { grid-area: p5; }
+    & .p6 { grid-area: p6; }
+    & .p7 { grid-area: p7; }
+    & .p8 { grid-area: p8; }
+    & .p9 { grid-area: p9; }
+}
+
+.digits.centerpencilmark button,
+.digits.digit button {
+    display: grid;
+    place-items: center;
+}
+
+.digits.centerpencilmark {
+    font-size: 1rem;
+}
+
+.digits.digit {
+    font-size: 2rem;
+}
