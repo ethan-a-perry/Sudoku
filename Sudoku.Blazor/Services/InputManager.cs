@@ -27,6 +27,7 @@ public class InputManager(Grid grid, SelectionManager selectionManager)
                 };
                 break;
             case "ArrowUp" or "ArrowRight" or "ArrowDown" or "ArrowLeft":
+                // Find grid offset according to the arrow key direction
                 var (row, col) = input switch {
                     "ArrowUp" => (-1, 0),
                     "ArrowRight" => (0, 1),
