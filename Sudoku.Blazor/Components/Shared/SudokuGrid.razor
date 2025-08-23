@@ -40,8 +40,8 @@
 
 <div class="digits @InputManager.Mode.ToString().ToLower()">
     @for (int i = 1; i <= 9; i++) {
-        var index = i;
-        <button @onclick="() => InputManager.FilterInput(index.ToString())">
+        var value = (char)('0' + i);
+        <button @onclick="() => InputManager.HandleSet(value)">
             <span class="@("p" + i)">@i</span>
         </button>
     }

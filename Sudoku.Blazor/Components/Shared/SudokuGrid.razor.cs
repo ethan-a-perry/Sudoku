@@ -40,23 +40,7 @@ public partial class SudokuGrid : ComponentBase
         // If the shiftkey is pressed, Select or Delete mode can be activated.
         IsShiftKeyDown = e.ShiftKey;
 
-        // Initiate undo or redo by checking Ctrl (Windows) and Cmd (Mac) keys
-        switch (e.Key.ToLowerInvariant()) {
-            // Ctrl+Y or Cmd+Y
-            case "y" when e.CtrlKey || e.MetaKey:
-                UndoRedoService.Redo();
-                return;
-            // Ctrl+Z or Cmd+Z
-            case "z" when e.CtrlKey || e.MetaKey && !e.ShiftKey:
-                UndoRedoService.Undo();
-                return;
-            // Cmd+Shift+Z
-            case "z" when e.MetaKey && e.ShiftKey:
-                UndoRedoService.Redo();
-                return;
-        }
-        
-        InputManager.FilterInput(e.Key);
+        InputManager.FilterKeyboardEvent(e);
     }
     
     private void OnKeyUp(KeyboardEventArgs e) {

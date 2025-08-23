@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Components.Web;
 using Sudoku.Core.Enums;
 using Sudoku.Core.Models;
 using Sudoku.Core.Records;
@@ -10,10 +11,26 @@ public class InputManager(Grid grid, SelectionManager selectionManager, UndoRedo
     public InputMode Mode { get; set; } = InputMode.Digit;
     public IEnumerable<Cell> EditableCells => selectionManager.EditableCells;
 
-    public void FilterInput(string input) {
-        switch (input) {
+    public void FilterKeyboardEvent(KeyboardEventArgs e) {
+        switch (e.Key.ToLowerInvariant()) {
+            // Ctrl+Y or Cmd+Y
+            case "y" when e.CtrlKey || e.MetaKey:
+                undoRedoService.Redo();
+                return;
+            // Ctrl+Z or Cmd+Z
+            case "z" when (e.CtrlKey || e.MetaKey) && !e.ShiftKey:
+                undoRedoService.Undo();
+                return;
+            // Cmd+Shift+Z
+            case "z" when e.MetaKey && e.ShiftKey:
+                undoRedoService.Redo();
+                return;
+        }
+        
+        switch (e.Key) {
+            // When any single character is entered
             case { Length: 1 }:
-                HandleSet(input.ToUpper()[0]);
+                HandleSet(e.Key.ToUpper()[0]);
                 break;
             case "Backspace":
                 HandleUnset();
@@ -28,7 +45,7 @@ public class InputManager(Grid grid, SelectionManager selectionManager, UndoRedo
                 break;
             case "ArrowUp" or "ArrowRight" or "ArrowDown" or "ArrowLeft":
                 // Find grid offset according to the arrow key direction
-                var (row, col) = input switch {
+                var (row, col) = e.Key switch {
                     "ArrowUp" => (-1, 0),
                     "ArrowRight" => (0, 1),
                     "ArrowDown" => (1, 0),
