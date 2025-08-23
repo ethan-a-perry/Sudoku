@@ -26,17 +26,16 @@ public class InputManager(Grid grid, SelectionManager selectionManager)
                     _ => throw new ArgumentOutOfRangeException()
                 };
                 break;
-            case "ArrowUp":
-                selectionManager.TraverseGrid(grid.Cells, -1, 0);
-                break;
-            case "ArrowRight":
-                selectionManager.TraverseGrid(grid.Cells, 0, 1);
-                break;
-            case "ArrowDown":
-                selectionManager.TraverseGrid(grid.Cells, 1, 0);
-                break;
-            case "ArrowLeft":
-                selectionManager.TraverseGrid(grid.Cells, 0, -1);
+            case "ArrowUp" or "ArrowRight" or "ArrowDown" or "ArrowLeft":
+                var (row, col) = input switch {
+                    "ArrowUp" => (-1, 0),
+                    "ArrowRight" => (0, 1),
+                    "ArrowDown" => (1, 0),
+                    "ArrowLeft" => (0, -1),
+                    _ => (0, 0)
+                };
+                
+                selectionManager.TraverseGrid(grid.Cells, row, col);
                 break;
         }
     }
