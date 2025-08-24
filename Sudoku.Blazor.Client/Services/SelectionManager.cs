@@ -4,7 +4,7 @@ using Sudoku.Core.Records;
 using Sudoku.DataAccess;
 using Sudoku.DataAccess.Services;
 
-namespace Sudoku.Blazor.Services;
+namespace Sudoku.Blazor.Client.Services;
 
 public class SelectionManager
 {

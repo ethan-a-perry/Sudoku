@@ -1,43 +1,7 @@
 @page "/"
 
-@rendermode InteractiveServer
+@using Sudoku.Blazor.Client.Components.Shared
 
-@using Sudoku.Blazor.Components.Shared
-@using Sudoku.DataAccess.Data
-@using Sudoku.DataAccess.Models
-@using Sudoku.DataAccess.Services
-@using Sudoku.Core.Models
-
-@inject IPuzzleData PuzzleData
-@inject Grid Grid
-
-<SudokuGrid></SudokuGrid>
-
-<ul>
-    @foreach (var puzzle in puzzles) {
-        <li @onclick="@(() => SelectPuzzle(puzzle))">@puzzle.Title by @puzzle.Constructor</li>
-    }
-</ul>
-
-<a @onclick="Solve">Check solution</a>
-
-@code {
-    private List<PuzzleModel> puzzles = [];
-    private SudokuSolver sudokuSolver = new();
-    private bool isSolved;
-    
-    protected override async Task OnInitializedAsync() {
-        puzzles = await PuzzleData.GetAllPuzzles();
-        Grid.InitializePuzzle(puzzles.FirstOrDefault().Grid);
-    }
-    
-    private void SelectPuzzle(PuzzleModel puzzle) {
-        Grid.InitializePuzzle(puzzle.Grid);
-    }
-
-    private void Solve() {
-        if (sudokuSolver.IsSolved(Grid.Cells)) {
-            isSolved = true;
-        }
-    }
-}
+<div id="sudoku">
+    <SudokuGrid @rendermode="InteractiveWebAssembly"></SudokuGrid>
+</div>

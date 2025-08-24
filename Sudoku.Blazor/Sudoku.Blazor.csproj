@@ -8,8 +8,17 @@
   </PropertyGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\Sudoku.Blazor.Client\Sudoku.Blazor.Client.csproj" />
       <ProjectReference Include="..\Sudoku.Core\Sudoku.Core.csproj" />
       <ProjectReference Include="..\Sudoku.DataAccess\Sudoku.DataAccess.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="9.0.8" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="wwwroot\" />
     </ItemGroup>
 
 </Project>

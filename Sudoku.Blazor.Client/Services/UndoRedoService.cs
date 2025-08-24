@@ -2,7 +2,7 @@ using Sudoku.Core.Models;
 using Sudoku.Core.Records;
 using Sudoku.DataAccess.Services;
 
-namespace Sudoku.Blazor.Services;
+namespace Sudoku.Blazor.Client.Services;
 
 public class UndoRedoService(Grid grid, SelectionManager selectionManager)
 {
