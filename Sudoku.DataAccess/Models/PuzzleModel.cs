@@ -14,5 +14,5 @@ public class PuzzleModel
     public string Difficulty { get; set; }
     public int NumRows { get; set; }
     public int NumCols { get; set; }
-    public string[,] Grid { get; set; }
+    public string[][] Grid { get; set; }
 }

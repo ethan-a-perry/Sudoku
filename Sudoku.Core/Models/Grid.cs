@@ -14,11 +14,11 @@ public class Grid
         }
     }
     
-    public void InitializePuzzle(string[,] grid) {
-        for (int row = 0; row < grid.GetLength(0); row++) {
-            for (int col = 0; col < grid.GetLength(1); col++) {
+    public void InitializePuzzle(string[][] grid) {
+        for (int row = 0; row < grid.Length; row++) {
+            for (int col = 0; col < grid[0].Length; col++) {
                 // s is your string of length 1 with a digit '1' to '9'
-                if (grid[row, col] is [>= '1' and <= '9'] s) {
+                if (grid[row][col] is [>= '1' and <= '9'] s) {
                     Cells[row, col].Value = s[0];
                     Cells[row, col].IsGiven = true;
                 }

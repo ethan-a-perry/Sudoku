@@ -17,6 +17,7 @@ public class MongoPuzzleData : IPuzzleData
     }
 
     public async Task<List<PuzzleModel>> GetAllPuzzles() {
+        Console.WriteLine("Mongo");
         var output = _cache.Get<List<PuzzleModel>>(CacheName);
         if (output is null) {
             var results = await _puzzles.FindAsync(_ => true);

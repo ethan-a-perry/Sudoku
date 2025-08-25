@@ -13,14 +13,11 @@
 
     <ItemGroup>
       <ProjectReference Include="..\Sudoku.Core\Sudoku.Core.csproj" />
+      <ProjectReference Include="..\Sudoku.DataAccess\Sudoku.DataAccess.csproj" />
     </ItemGroup>
 
     <ItemGroup>
       <_ContentIncludedByDefault Remove="Layout\MainLayout.razor" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <Folder Include="wwwroot\" />
     </ItemGroup>
 
 </Project>

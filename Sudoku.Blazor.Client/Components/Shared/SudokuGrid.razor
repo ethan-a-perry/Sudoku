@@ -48,3 +48,12 @@
         </button>
     }
 </div>
+
+
+<ul>
+    @foreach (var puzzle in puzzles) {
+        <li @onclick="@(() => SelectPuzzle(puzzle))">@puzzle.Title by @puzzle.Constructor</li>
+    }
+</ul>
+
+<a @onclick="Solve">Check solution</a>
