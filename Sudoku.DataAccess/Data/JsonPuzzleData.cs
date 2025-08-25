@@ -10,17 +10,7 @@ public class JsonPuzzleData : IPuzzleData
     public JsonPuzzleData(HttpClient httpClient) {
         _httpClient = httpClient;
     }
-    public async Task<List<PuzzleModel>> GetAllPuzzles() { 
-        Console.WriteLine("Json");
+    public async Task<List<PuzzleModel>> GetAllPuzzles() {
         return await _httpClient.GetFromJsonAsync<List<PuzzleModel>>("/blazor/data/puzzles.json") ?? [];
-    }
-
-    public async Task<PuzzleModel> GetPuzzle(string id) {
-        var puzzles = await GetAllPuzzles();
-        return puzzles.FirstOrDefault(p => p.Id == id);
-    }
-
-    public Task CreatePuzzle(PuzzleModel puzzle) {
-        throw new NotSupportedException("Cannot create puzzles in WASM JSON service.");
     }
 }
