@@ -50,7 +50,7 @@
     
     <ul>
         @foreach (var puzzle in _puzzles) {
-            <li @onclick="@(() => SwitchSession(puzzle))">@puzzle.Title by @puzzle.Constructor</li>
+            <li @onclick="@(() => LoadSession(puzzle))">@puzzle.Title by @puzzle.Constructor</li>
         }
     </ul>
 

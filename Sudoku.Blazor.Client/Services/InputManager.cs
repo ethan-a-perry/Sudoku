@@ -10,6 +10,8 @@ public class InputManager(PuzzleSession currentSession, SelectionManager selecti
     private bool _isMouseDown;
     private bool _isShiftKeyDown;
 
+    public event EventHandler? GridUpdate;
+
     public void SetCurrentSession(PuzzleSession newSession) {
         _currentSession = newSession;
     }
@@ -18,15 +20,15 @@ public class InputManager(PuzzleSession currentSession, SelectionManager selecti
         switch (e.Key.ToLowerInvariant()) {
             // Ctrl+Y or Cmd+Y
             case "y" when e.CtrlKey || e.MetaKey:
-                undoRedoService.Redo();
+                Redo();
                 return;
             // Ctrl+Z or Cmd+Z
             case "z" when (e.CtrlKey || e.MetaKey) && !e.ShiftKey:
-                undoRedoService.Undo();
+                Undo();
                 return;
             // Cmd+Shift+Z
             case "z" when e.MetaKey && e.ShiftKey:
-                undoRedoService.Redo();
+                Redo();
                 return;
         }
         
@@ -90,6 +92,8 @@ public class InputManager(PuzzleSession currentSession, SelectionManager selecti
                     break;
             }
         });
+        
+        GridUpdate?.Invoke(this, EventArgs.Empty);
     }
 
     public void HandleUnset() {
@@ -113,6 +117,8 @@ public class InputManager(PuzzleSession currentSession, SelectionManager selecti
             // Remove all center pencil marks
             _currentSession.Grid.UnsetCenterPencilMarks(_currentSession.EditableCells);
         });
+        
+        GridUpdate?.Invoke(this, EventArgs.Empty);
     }
     
     public void OnMouseDown(MouseEventArgs e, int row, int col) {
@@ -147,6 +153,13 @@ public class InputManager(PuzzleSession currentSession, SelectionManager selecti
         _isShiftKeyDown = e.ShiftKey;
     }
     
-    public void Undo() => undoRedoService.Undo();
-    public void Redo() => undoRedoService.Redo();
+    public void Undo() {
+        undoRedoService.Undo();
+        GridUpdate?.Invoke(this, EventArgs.Empty);
+    }
+
+    public void Redo() {
+        undoRedoService.Redo();
+        GridUpdate?.Invoke(this, EventArgs.Empty);
+    }
 }

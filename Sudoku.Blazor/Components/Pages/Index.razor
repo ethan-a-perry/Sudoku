@@ -3,5 +3,5 @@
 @using Sudoku.Blazor.Client.Components.Shared
 
 <div id="sudoku">
-    <SudokuGrid @rendermode="InteractiveServer"></SudokuGrid>
+    <SudokuGrid @rendermode="new InteractiveWebAssemblyRenderMode(prerender: false)"></SudokuGrid>
 </div>

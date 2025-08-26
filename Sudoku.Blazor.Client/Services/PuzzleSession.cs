@@ -9,7 +9,7 @@ namespace Sudoku.Blazor.Client.Services;
 public class PuzzleSession
 {
     public string Id { get; set; }
-    public Grid Grid { get; }
+    public Grid Grid { get; set; }
     
     public SnapshotManager SnapshotManager { get; set; } = new();
     

@@ -4,7 +4,7 @@ public class Grid
 {
     public int NumRows { get; set; }
     public int NumCols { get; set; }
-    private List<Cell> Cells { get; set; } = [];
+    public List<Cell> Cells { get; set; } = [];
 
     public Grid() {
         NumRows = 9;
