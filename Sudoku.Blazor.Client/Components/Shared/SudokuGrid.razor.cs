@@ -80,6 +80,14 @@ public partial class SudokuGrid : ComponentBase
             await Console.Error.WriteLineAsync($"Failed to save puzzle: {ex}");
         }
     }
+
+    private async Task Restart() {
+        var currentPuzzle = _puzzles.FirstOrDefault(p => p.Id == _currentSession.Id);
+
+        _currentSession = new PuzzleSession(currentPuzzle);
+        
+        await PuzzleStorageService.SaveGrid(_currentSession.Id, _currentSession.Grid);
+    }
     
     public void Dispose() {
         _inputManager.GridUpdate -= HandleGridUpdate;
