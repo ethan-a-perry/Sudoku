@@ -1,59 +1,61 @@
-<div class="grid" tabindex="-1" @onkeydown="OnKeyDown" @onkeyup="OnKeyUp" @onkeydown:preventDefault="true">
-    @foreach (var cell in Grid.GetCells()) {
-        var row = cell.Row;
-        var col = cell.Col;
-        <div
-            class="cell"
-            aria-selected="@(SelectionManager.IsCellSelected(cell) ? "true" : "false")"
-            @onmousedown="e => OnMouseDown(e, row, col)"
-            @onmouseup="() => OnMouseUp()"
-            @onmouseenter="() => OnMouseEnter(row, col)">
-        
-            @if (cell.Value is not '\0') {
-                @cell.Value
-            }
-            else {
-                if (cell.PencilMarks.Corner.Count > 0) {
-                    int index = 1;
-                    <div class="pencil-marks corner">
-                        @foreach (var pencilMark in cell.PencilMarks.Corner) {
-                            <span class="pencil-mark @($"p{index}")">@pencilMark</span>
-                            index++;
-                        }
-                    </div>
+@if (_currentSession is not null) {
+    <div class="grid" tabindex="-1" @onkeydown="_inputManager.OnKeyDown" @onkeyup="_inputManager.OnKeyUp" @onkeydown:preventDefault="true">
+        @foreach (var cell in _currentSession.Grid.GetCells()) {
+            var row = cell.Row;
+            var col = cell.Col;
+            <div
+                class="cell"
+                aria-selected="@(_selectionManager.IsCellSelected(cell) ? "true" : "false")"
+                @onmousedown="e => _inputManager.OnMouseDown(e, row, col)"
+                @onmouseup="() => _inputManager.OnMouseUp()"
+                @onmouseenter="() => _inputManager.OnMouseEnter(row, col)">
+            
+                @if (cell.Value is not '\0') {
+                    @cell.Value
                 }
-                
-                if (cell.PencilMarks.Center.Count > 0) {
-                    <div class="pencil-marks center @(cell.PencilMarks.Center.Count == 8 ? "eight-digits" : "") @(cell.PencilMarks.Center.Count == 9 ? "nine-digits" : "")">
-                        @foreach (var pencilMark in cell.PencilMarks.Center) {
-                            <span class="pencil-mark">@pencilMark</span>
-                        }
-                    </div>
+                else {
+                    if (cell.PencilMarks.Corner.Count > 0) {
+                        int index = 1;
+                        <div class="pencil-marks corner">
+                            @foreach (var pencilMark in cell.PencilMarks.Corner) {
+                                <span class="pencil-mark @($"p{index}")">@pencilMark</span>
+                                index++;
+                            }
+                        </div>
+                    }
+                    
+                    if (cell.PencilMarks.Center.Count > 0) {
+                        <div class="pencil-marks center @(cell.PencilMarks.Center.Count == 8 ? "eight-digits" : "") @(cell.PencilMarks.Center.Count == 9 ? "nine-digits" : "")">
+                            @foreach (var pencilMark in cell.PencilMarks.Center) {
+                                <span class="pencil-mark">@pencilMark</span>
+                            }
+                        </div>
+                    }
                 }
-            }
-        </div>
-    }
-</div>
+            </div>
+        }
+    </div>
 
-<a @onclick="Solve">Check solution</a>
+    <button @onclick="_inputManager.Undo">Undo</button>
+    <button @onclick="_inputManager.Redo">Redo</button>
 
-<button @onclick="() => UndoRedoService.Undo()">Undo</button>
-<button @onclick="() => UndoRedoService.Redo()">Redo</button>
+    <div class="digits @_currentSession.InputMode.ToString().ToLower()">
+        @for (int i = 1; i <= 9; i++) {
+            var value = (char)('0' + i);
+            <button @onclick="() => _inputManager.HandleSet(value)">
+                <span class="@("p" + i)">@i</span>
+            </button>
+        }
+    </div>
+    
+    <ul>
+        @foreach (var puzzle in _puzzles) {
+            <li @onclick="@(() => SwitchSession(puzzle))">@puzzle.Title by @puzzle.Constructor</li>
+        }
+    </ul>
 
-<div class="digits @InputManager.Mode.ToString().ToLower()">
-    @for (int i = 1; i <= 9; i++) {
-        var value = (char)('0' + i);
-        <button @onclick="() => InputManager.HandleSet(value)">
-            <span class="@("p" + i)">@i</span>
-        </button>
-    }
-</div>
-
-
-<ul>
-    @foreach (var puzzle in puzzles) {
-        <li @onclick="@(() => SelectPuzzle(puzzle))">@puzzle.Title by @puzzle.Constructor</li>
-    }
-</ul>
-
-<a @onclick="Solve">Check solution</a>
+    <a @onclick="Solve">Check solution</a>
+}
+else {
+    <p>...Loading</p>
+}

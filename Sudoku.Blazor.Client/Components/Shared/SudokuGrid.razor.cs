@@ -1,9 +1,5 @@
-using System.Net.Http.Json;
-using System.Text.Json;
 using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Web;
 using Sudoku.Blazor.Client.Services;
-using Sudoku.Core.Models;
 using Sudoku.DataAccess.Data;
 using Sudoku.DataAccess.Services;
 using Sudoku.DataAccess.Models;
@@ -13,60 +9,40 @@ namespace Sudoku.Blazor.Client.Components.Shared;
 public partial class SudokuGrid : ComponentBase
 {
     [Inject] private IPuzzleData PuzzleData { get; set; }
-    [Inject] private Grid Grid { get; set; }
-    [Inject] private UndoRedoService UndoRedoService { get; set; }
-    [Inject] private SelectionManager SelectionManager { get; set; }
-    [Inject] private InputManager InputManager { get; set; }
-    private List<PuzzleModel> puzzles = [];
+    private List<PuzzleModel> _puzzles = [];
+    
+    private List<PuzzleSession> _sessions = [];
+    private PuzzleSession _currentSession;
+    
+    private InputManager _inputManager;
+    private SelectionManager _selectionManager;
+    private UndoRedoService _undoRedoService;
+    
     private SudokuSolver SudokuSolver { get; set; } = new();
-    private bool IsMouseDown { get; set; }
-    private bool IsShiftKeyDown { get; set; }
     
     protected override async Task OnInitializedAsync() {
-        puzzles = await PuzzleData.GetAllPuzzles();
+        _puzzles = await PuzzleData.GetAllPuzzles();
 
-        var puzzle = puzzles.FirstOrDefault().Grid;
+        foreach (var puzzle in _puzzles) {
+            _sessions.Add(new PuzzleSession(puzzle));
+        }
         
-        Grid.InitializePuzzle(puzzle);
+        _currentSession = _sessions[0];
+        
+        _selectionManager = new SelectionManager(_currentSession);
+        _undoRedoService = new UndoRedoService(_currentSession, _selectionManager);
+        _inputManager = new InputManager(_currentSession, _selectionManager, _undoRedoService);
     }
-    
-    private void SelectPuzzle(PuzzleModel puzzle) {
-        Grid.InitializePuzzle(puzzle.Grid);
+
+    private void SwitchSession(PuzzleModel puzzle) {
+        _currentSession = _sessions.FirstOrDefault(s => s.Id == puzzle.Id)!;
+        
+        _selectionManager.SetCurrentSession(_currentSession);
+        _undoRedoService.SetCurrentSession(_currentSession);
+        _inputManager.SetCurrentSession(_currentSession);
     }
     
     private void Solve() {
-        Console.WriteLine(SudokuSolver.IsSolved(Grid) ? "Solved" : "Not solved");
-    }
-    
-    private void OnMouseDown(MouseEventArgs e, int row, int col) {
-        // If the user right-clicks or opens the context menu, restrict grid interactivity.
-        if (e.Button != 0) return;
-        IsMouseDown = true;
-        
-        SelectionManager.HandleMouseDown(Grid.GetCell(row, col), IsShiftKeyDown);
-    }
-    
-    private void OnMouseUp() {
-        IsMouseDown = false;
-        SelectionManager.HandleMouseUp();
-    }
-    
-    /// <summary>
-    /// Lets the user toggle a cell whenever they are dragging their mouse.
-    /// </summary>
-    private void OnMouseEnter(int row, int col) {
-        if (!IsMouseDown) return;
-        SelectionManager.HandleMouseEnter(Grid.GetCell(row, col));
-    }
-    
-    private void OnKeyDown(KeyboardEventArgs e) {
-        // If the shiftkey is pressed, Select or Delete mode can be activated.
-        IsShiftKeyDown = e.ShiftKey;
-
-        InputManager.FilterKeyboardEvent(e);
-    }
-    
-    private void OnKeyUp(KeyboardEventArgs e) {
-        IsShiftKeyDown = e.ShiftKey;
+        Console.WriteLine(SudokuSolver.IsSolved(_currentSession.Grid) ? "Solved" : "Not solved");
     }
 }

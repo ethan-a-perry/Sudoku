@@ -1,29 +1,36 @@
 using Sudoku.Core.Enums;
 using Sudoku.Core.Models;
-using Sudoku.Core.Records;
-using Sudoku.DataAccess;
-using Sudoku.DataAccess.Services;
 
 namespace Sudoku.Blazor.Client.Services;
 
-public class SelectionManager
+public class SelectionManager(PuzzleSession currentSession)
 {
-    public SelectionMode Mode { get; set; } = SelectionMode.Regular;
-    private LinkedHashSet<Cell> SelectedCells { get; set; } = [];
-    public IEnumerable<Cell> EditableCells => SelectedCells.Where(c => !c.IsGiven);
+    private PuzzleSession _currentSession = currentSession;
     
-    public bool IsCellSelected(Cell cell) => SelectedCells.Contains(cell);
-    public void SelectCell(Cell cell) => SelectedCells.Add(cell);
-    public void DeselectCell(Cell cell) => SelectedCells.Remove(cell);
+    public void SetCurrentSession(PuzzleSession newSession) {
+        _currentSession = newSession;
+    }
+    
+    public bool IsCellSelected(Cell cell) {
+        return _currentSession.SelectedCells.Contains(cell);
+    }
+
+    public void SelectCell(Cell cell) {
+        _currentSession.SelectedCells.Add(cell);
+    }
+
+    public void DeselectCell(Cell cell) {
+        _currentSession.SelectedCells.Remove(cell);
+    }
 
     public void DeselectAllCells() {
-        SelectedCells.Clear();
+        _currentSession.SelectedCells.Clear();
     }
     
     public void FilterSelection(Cell cell) {
-        switch (Mode) {
+        switch (_currentSession.SelectionMode) {
             case SelectionMode.Regular:
-                if (SelectedCells.Contains(cell) && SelectedCells.Count == 1) {
+                if (_currentSession.SelectedCells.Contains(cell) && _currentSession.SelectedCells.Count == 1) {
                     DeselectCell(cell);
                 }
                 else {
@@ -43,26 +50,26 @@ public class SelectionManager
     public void HandleMouseDown(Cell cell, bool isShiftKeyDown = false) {
         // See GridMode.cs for info about the various grid modes.
         if (isShiftKeyDown) {
-            Mode = IsCellSelected(cell) ? SelectionMode.Delete : SelectionMode.Select;
+            _currentSession.SelectionMode = IsCellSelected(cell) ? SelectionMode.Delete : SelectionMode.Select;
         }
         
         FilterSelection(cell);
     }
     
     public void HandleMouseUp() {
-        Mode = SelectionMode.Regular;
+        _currentSession.SelectionMode = SelectionMode.Regular;
     }
 
     public void HandleMouseEnter(Cell cell) {
-        if (Mode == SelectionMode.Regular) {
-            Mode = SelectionMode.Select;
+        if (_currentSession.SelectionMode == SelectionMode.Regular) {
+            _currentSession.SelectionMode = SelectionMode.Select;
         }
         
         FilterSelection(cell);
     }
 
     public void TraverseGrid(Grid grid, int deltaRow, int deltaCol) {
-        var lastCellSelected = SelectedCells.Last();
+        var lastCellSelected = _currentSession.SelectedCells.Last();
         
         int newRow = (lastCellSelected.Row + deltaRow + grid.NumCols) % grid.NumCols;
         int newCol = (lastCellSelected.Col + deltaCol + grid.NumRows) % grid.NumRows;

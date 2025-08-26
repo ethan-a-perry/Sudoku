@@ -1,15 +1,18 @@
 using Microsoft.AspNetCore.Components.Web;
 using Sudoku.Core.Enums;
-using Sudoku.Core.Models;
-using Sudoku.Core.Records;
-using Sudoku.DataAccess.Services;
 
 namespace Sudoku.Blazor.Client.Services;
 
-public class InputManager(Grid grid, SelectionManager selectionManager, UndoRedoService undoRedoService)
+public class InputManager(PuzzleSession currentSession, SelectionManager selectionManager, UndoRedoService undoRedoService)
 {
-    public InputMode Mode { get; set; } = InputMode.Digit;
-    public IEnumerable<Cell> EditableCells => selectionManager.EditableCells;
+    private PuzzleSession _currentSession = currentSession;
+
+    private bool _isMouseDown;
+    private bool _isShiftKeyDown;
+
+    public void SetCurrentSession(PuzzleSession newSession) {
+        _currentSession = newSession;
+    }
 
     public void FilterKeyboardEvent(KeyboardEventArgs e) {
         switch (e.Key.ToLowerInvariant()) {
@@ -36,7 +39,7 @@ public class InputManager(Grid grid, SelectionManager selectionManager, UndoRedo
                 HandleUnset();
                 break;
             case "Tab":
-                Mode = Mode switch {
+                _currentSession.InputMode = _currentSession.InputMode switch {
                     InputMode.Digit => InputMode.CenterPencilMark,
                     InputMode.CenterPencilMark => InputMode.CornerPencilMark,
                     InputMode.CornerPencilMark => InputMode.Digit,
@@ -53,36 +56,36 @@ public class InputManager(Grid grid, SelectionManager selectionManager, UndoRedo
                     _ => (0, 0)
                 };
                 
-                selectionManager.TraverseGrid(grid, row, col);
+                selectionManager.TraverseGrid(_currentSession.Grid, row, col);
                 break;
         }
     }
 
     public void HandleSet(char input) {
         undoRedoService.RecordSnapshot(() => {
-            switch (Mode) {
+            switch (_currentSession.InputMode) {
                 case InputMode.Digit:
-                    if (EditableCells.All(c => c.Value == input)) {
-                        grid.UnsetDigit(EditableCells);
+                    if (_currentSession.EditableCells.All(c => c.Value == input)) {
+                        _currentSession.Grid.UnsetDigit(_currentSession.EditableCells);
                     }
                     else {
-                        grid.SetDigit(EditableCells, input);
+                        _currentSession.Grid.SetDigit(_currentSession.EditableCells, input);
                     }
                     break;
                 case InputMode.CornerPencilMark:
-                    if (EditableCells.All(c => c.PencilMarks.Corner.Contains(input))) {
-                        grid.UnsetCornerPencilMark(EditableCells, input);
+                    if (_currentSession.EditableCells.All(c => c.PencilMarks.Corner.Contains(input))) {
+                        _currentSession.Grid.UnsetCornerPencilMark(_currentSession.EditableCells, input);
                     }
                     else {
-                        grid.SetCornerPencilMark(EditableCells, input);
+                        _currentSession.Grid.SetCornerPencilMark(_currentSession.EditableCells, input);
                     }
                     break;
                 case InputMode.CenterPencilMark:
-                    if (EditableCells.All(c => c.PencilMarks.Center.Contains(input))) {
-                        grid.UnsetCenterPencilMark(EditableCells, input);
+                    if (_currentSession.EditableCells.All(c => c.PencilMarks.Center.Contains(input))) {
+                        _currentSession.Grid.UnsetCenterPencilMark(_currentSession.EditableCells, input);
                     }
                     else {
-                        grid.SetCenterPencilMark(EditableCells, input);
+                        _currentSession.Grid.SetCenterPencilMark(_currentSession.EditableCells, input);
                     }
                     break;
             }
@@ -92,23 +95,58 @@ public class InputManager(Grid grid, SelectionManager selectionManager, UndoRedo
     public void HandleUnset() {
         undoRedoService.RecordSnapshot(() => {
             // If any cells have Digits, remove then return
-            if (EditableCells.Any(c => c.Value is not '\0')) {
-                grid.UnsetDigit(EditableCells);
+            if (_currentSession.EditableCells.Any(c => c.Value is not '\0')) {
+                _currentSession.Grid.UnsetDigit(_currentSession.EditableCells);
                 return;
             }
         
             // If any of the cells have corner pencil marks,
             // check if the input mode is not a CenterPencilMark or if no center pencil marks exist.
             // If these pass, remove corner pencil marks
-            if (EditableCells.Any(c => c.PencilMarks.Corner.Count > 0)) {
-                if (Mode is not InputMode.CenterPencilMark || EditableCells.Any(c => c.PencilMarks.Center.Count == 0)) { 
-                    grid.UnsetCornerPencilMarks(EditableCells);
+            if (_currentSession.EditableCells.Any(c => c.PencilMarks.Corner.Count > 0)) {
+                if (_currentSession.InputMode is not InputMode.CenterPencilMark || _currentSession.EditableCells.Any(c => c.PencilMarks.Center.Count == 0)) { 
+                    _currentSession.Grid.UnsetCornerPencilMarks(_currentSession.EditableCells);
                     return;
                 }
             }
         
             // Remove all center pencil marks
-            grid.UnsetCenterPencilMarks(EditableCells);
+            _currentSession.Grid.UnsetCenterPencilMarks(_currentSession.EditableCells);
         });
     }
+    
+    public void OnMouseDown(MouseEventArgs e, int row, int col) {
+        // If the user right-clicks or opens the context menu, restrict grid interactivity.
+        if (e.Button != 0) return;
+        _isMouseDown = true;
+        
+        selectionManager.HandleMouseDown(_currentSession.Grid.GetCell(row, col), _isShiftKeyDown);
+    }
+    
+    public void OnMouseUp() {
+        _isMouseDown = false;
+        selectionManager.HandleMouseUp();
+    }
+    
+    /// <summary>
+    /// Lets the user toggle a cell whenever they are dragging their mouse.
+    /// </summary>
+    public void OnMouseEnter(int row, int col) {
+        if (!_isMouseDown) return;
+        selectionManager.HandleMouseEnter(_currentSession.Grid.GetCell(row, col));
+    }
+    
+    public void OnKeyDown(KeyboardEventArgs e) {
+        // If the shiftkey is pressed, Select or Delete mode can be activated.
+        _isShiftKeyDown = e.ShiftKey;
+    
+        FilterKeyboardEvent(e);
+    }
+    
+    public void OnKeyUp(KeyboardEventArgs e) {
+        _isShiftKeyDown = e.ShiftKey;
+    }
+    
+    public void Undo() => undoRedoService.Undo();
+    public void Redo() => undoRedoService.Redo();
 }
