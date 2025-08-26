@@ -35,7 +35,7 @@ public partial class SudokuGrid : ComponentBase
     }
     
     private void Solve() {
-        Console.WriteLine(SudokuSolver.IsSolved(Grid.Cells) ? "Solved" : "Not solved");
+        Console.WriteLine(SudokuSolver.IsSolved(Grid) ? "Solved" : "Not solved");
     }
     
     private void OnMouseDown(MouseEventArgs e, int row, int col) {
@@ -43,7 +43,7 @@ public partial class SudokuGrid : ComponentBase
         if (e.Button != 0) return;
         IsMouseDown = true;
         
-        SelectionManager.HandleMouseDown(Grid.Cells[row, col], IsShiftKeyDown);
+        SelectionManager.HandleMouseDown(Grid.GetCell(row, col), IsShiftKeyDown);
     }
     
     private void OnMouseUp() {
@@ -56,7 +56,7 @@ public partial class SudokuGrid : ComponentBase
     /// </summary>
     private void OnMouseEnter(int row, int col) {
         if (!IsMouseDown) return;
-        SelectionManager.HandleMouseEnter(Grid.Cells[row, col]);
+        SelectionManager.HandleMouseEnter(Grid.GetCell(row, col));
     }
     
     private void OnKeyDown(KeyboardEventArgs e) {

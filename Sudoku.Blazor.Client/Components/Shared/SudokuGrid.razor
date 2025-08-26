@@ -1,5 +1,5 @@
 <div class="grid" tabindex="-1" @onkeydown="OnKeyDown" @onkeyup="OnKeyUp" @onkeydown:preventDefault="true">
-    @foreach (var cell in Grid.Cells) {
+    @foreach (var cell in Grid.GetCells()) {
         var row = cell.Row;
         var col = cell.Col;
         <div

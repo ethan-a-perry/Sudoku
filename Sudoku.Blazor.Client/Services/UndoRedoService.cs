@@ -22,7 +22,7 @@ public class UndoRedoService(Grid grid, SelectionManager selectionManager)
         selectionManager.DeselectAllCells();
         
         foreach (var cellState in cellStates) {
-            var cell = grid.Cells[cellState.Row, cellState.Col];
+            var cell = grid.GetCell(cellState.Row, cellState.Col);
             char value = cellState.Value;
             
             selectionManager.SelectCell(cell);

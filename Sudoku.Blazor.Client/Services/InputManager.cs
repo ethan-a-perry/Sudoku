@@ -53,7 +53,7 @@ public class InputManager(Grid grid, SelectionManager selectionManager, UndoRedo
                     _ => (0, 0)
                 };
                 
-                selectionManager.TraverseGrid(grid.Cells, row, col);
+                selectionManager.TraverseGrid(grid, row, col);
                 break;
         }
     }

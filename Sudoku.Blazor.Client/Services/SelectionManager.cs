@@ -61,13 +61,13 @@ public class SelectionManager
         FilterSelection(cell);
     }
 
-    public void TraverseGrid(Cell[,] cells, int deltaRow, int deltaCol) {
+    public void TraverseGrid(Grid grid, int deltaRow, int deltaCol) {
         var lastCellSelected = SelectedCells.Last();
         
-        int newRow = (lastCellSelected.Row + deltaRow + cells.GetLength(1)) % cells.GetLength(1);
-        int newCol = (lastCellSelected.Col + deltaCol + cells.GetLength(0)) % cells.GetLength(0);
+        int newRow = (lastCellSelected.Row + deltaRow + grid.NumCols) % grid.NumCols;
+        int newCol = (lastCellSelected.Col + deltaCol + grid.NumRows) % grid.NumRows;
         
         DeselectAllCells();
-        SelectCell(cells[newRow, newCol]);
+        SelectCell(grid.GetCell(newRow, newCol));
     }
 }

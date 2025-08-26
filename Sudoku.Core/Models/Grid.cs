@@ -2,33 +2,46 @@ namespace Sudoku.Core.Models;
 
 public class Grid
 {
-    public Cell[,] Cells { get; set; }
+    public int NumRows { get; set; }
+    public int NumCols { get; set; }
+    private List<Cell> Cells { get; set; } = [];
 
-    public Grid(int rows, int cols) {
-        Cells = new Cell[rows, cols];
+    public Grid(int numRows, int numCols) {
+        NumRows = numRows;
+        NumCols = numCols;
 
-        for (int row = 0; row < rows; row++) {
-            for (int col = 0; col < cols; col++) {
-                Cells[row, col] = new Cell(row, col);
+        for (int row = 0; row < numRows; row++) {
+            for (int col = 0; col < numCols; col++) {
+                Cells.Add(new Cell(row, col));
             }
         }
     }
     
-    public void InitializePuzzle(string[][] grid) {
-        for (int row = 0; row < grid.Length; row++) {
-            for (int col = 0; col < grid[0].Length; col++) {
+    public void InitializePuzzle(List<string> grid) {
+        for (int row = 0; row < NumRows; row++) {
+            for (int col = 0; col < NumCols; col++) {
                 // s is your string of length 1 with a digit '1' to '9'
-                if (grid[row][col] is [>= '1' and <= '9'] s) {
-                    Cells[row, col].Value = s[0];
-                    Cells[row, col].IsGiven = true;
+                if (grid[row * 9 + col] is [>= '1' and <= '9'] s) {
+                    GetCell(row, col).Value = s[0];
+                    GetCell(row, col).IsGiven = true;
                 }
                 // If no digit is given, set the value to null
                 else {
-                    Cells[row, col].Value = '\0';
-                    Cells[row, col].IsGiven = false;
+                    GetCell(row, col).Value = '\0';
+                    GetCell(row, col).IsGiven = false;
                 }
             }
         }
+    }
+    
+    public List<Cell> GetCells() => Cells;
+    
+    public Cell GetCell(int row, int col) {
+        if (row < 0 || row >= 9 || col < 0 || col >= 9) {
+            throw new ArgumentOutOfRangeException("Row or column is out of bounds.");
+        }
+        
+        return Cells[row * 9 + col];
     }
     
     public void SetDigit(IEnumerable<Cell> cells, char value) {

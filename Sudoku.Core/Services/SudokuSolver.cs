@@ -9,12 +9,12 @@ public class SudokuSolver
     public int BoxRows { get; set; } = 3;
     public int BoxCols { get; set; } = 3;
     
-    public bool IsSolved(Cell[,] cells) {
+    public bool IsSolved(Grid grid) {
         HashSet<string> seen = [];
 
         for (int r = 0; r < GridRows; r++) {
             for (int c = 0; c < GridCols; c++) {
-                char? value = cells[r, c].Value;
+                char? value = grid.GetCell(r, c).Value;
 
                 if (value == 0 || value is null) return false;
 
