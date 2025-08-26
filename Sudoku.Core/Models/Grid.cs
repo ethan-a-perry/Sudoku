@@ -6,10 +6,21 @@ public class Grid
     public int NumCols { get; set; }
     private List<Cell> Cells { get; set; } = [];
 
+    public Grid() {
+        NumRows = 9;
+        NumCols = 9;
+        
+        InitializePuzzle(NumRows, NumCols);
+    }
+
     public Grid(int numRows, int numCols) {
         NumRows = numRows;
         NumCols = numCols;
+        
+        InitializePuzzle(numRows, numCols);
+    }
 
+    public void InitializePuzzle(int numRows, int numCols) {
         for (int row = 0; row < numRows; row++) {
             for (int col = 0; col < numCols; col++) {
                 Cells.Add(new Cell(row, col));
@@ -17,7 +28,7 @@ public class Grid
         }
     }
     
-    public void InitializePuzzle(List<string> grid) {
+    public void LoadPuzzle(List<string> grid) {
         for (int row = 0; row < NumRows; row++) {
             for (int col = 0; col < NumCols; col++) {
                 // s is your string of length 1 with a digit '1' to '9'
