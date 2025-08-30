@@ -1,14 +1,17 @@
-@if (_currentSession is not null) {
-    <div class="grid" tabindex="-1" @onkeydown="_inputManager.OnKeyDown" @onkeyup="_inputManager.OnKeyUp" @onkeydown:preventDefault="true">
-        @foreach (var cell in _currentSession.Grid.GetCells()) {
+@using Sudoku.Core.Models
+<div class="sudoku">
+    <div class="grid @(_isSolved ? "solved" : "")" tabindex="-1" @onkeydown="_currentSession.InputManager.OnKeyDown" @onkeyup="_currentSession.InputManager.OnKeyUp" @onkeydown:preventDefault="true">
+    
+        @{ var cells = _currentSession?.Grid != null ? _currentSession.Grid.GetCells() : new Grid().GetCells(); }
+        @foreach (var cell in cells) {
             var row = cell.Row;
             var col = cell.Col;
             <div
                 class="cell"
-                aria-selected="@(_selectionManager.IsCellSelected(cell) ? "true" : "false")"
-                @onmousedown="e => _inputManager.OnMouseDown(e, row, col)"
-                @onmouseup="() => _inputManager.OnMouseUp()"
-                @onmouseenter="() => _inputManager.OnMouseEnter(row, col)">
+                aria-selected="@(_currentSession.SelectionManager.IsCellSelected(cell) ? "true" : "false")"
+                @onmousedown="e => _currentSession.InputManager.OnMouseDown(e, row, col)"
+                @onmouseup="() => _currentSession.InputManager.OnMouseUp()"
+                @onmouseenter="() => _currentSession.InputManager.OnMouseEnter(row, col)">
             
                 @if (cell.Value is not '\0') {
                     @cell.Value
@@ -23,7 +26,7 @@
                             }
                         </div>
                     }
-                    
+            
                     if (cell.PencilMarks.Center.Count > 0) {
                         <div class="pencil-marks center @(cell.PencilMarks.Center.Count == 8 ? "eight-digits" : "") @(cell.PencilMarks.Center.Count == 9 ? "nine-digits" : "")">
                             @foreach (var pencilMark in cell.PencilMarks.Center) {
@@ -36,13 +39,13 @@
         }
     </div>
 
-    <button @onclick="_inputManager.Undo">Undo</button>
-    <button @onclick="_inputManager.Redo">Redo</button>
-
-    <div class="digits @_currentSession.InputMode.ToString().ToLower()">
+    <button @onclick="_currentSession.InputManager.Undo">Undo</button>
+    <button @onclick="_currentSession.InputManager.Redo">Redo</button>
+    
+    <div class="digits @_currentSession.InputManager.InputMode.ToString().ToLower()">
         @for (int i = 1; i <= 9; i++) {
             var value = (char)('0' + i);
-            <button @onclick="() => _inputManager.HandleSet(value)">
+            <button @onclick="() => _currentSession.InputManager.HandleSet(value)">
                 <span class="@("p" + i)">@i</span>
             </button>
         }
@@ -53,11 +56,8 @@
             <li @onclick="@(() => LoadSession(puzzle))">@puzzle.Title by @puzzle.Constructor</li>
         }
     </ul>
-
+    
     <a @onclick="Solve">Check solution</a>
     
     <button @onclick="Restart">Restart</button>
-}
-else {
-    <p>...Loading</p>
-}
+</div>

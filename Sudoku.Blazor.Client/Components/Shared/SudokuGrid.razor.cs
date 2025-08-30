@@ -14,13 +14,10 @@ public partial class SudokuGrid : ComponentBase
     private List<PuzzleModel> _puzzles = [];
     
     private List<PuzzleSession> _sessions = [];
-    private PuzzleSession _currentSession;
-    
-    private InputManager _inputManager;
-    private SelectionManager _selectionManager;
-    private UndoRedoService _undoRedoService;
+    private PuzzleSession _currentSession = new();
     
     private SudokuSolver SudokuSolver { get; set; } = new();
+    private bool _isSolved;
     
     protected override async Task OnInitializedAsync() {
         _puzzles = await PuzzleData.GetAllPuzzles();
@@ -30,12 +27,8 @@ public partial class SudokuGrid : ComponentBase
         }
         
         _currentSession = _sessions[0];
-            
-        _selectionManager = new SelectionManager(_currentSession);
-        _undoRedoService = new UndoRedoService(_currentSession, _selectionManager);
-        _inputManager = new InputManager(_currentSession, _selectionManager, _undoRedoService);
-
-        _inputManager.GridUpdate += HandleGridUpdate;
+        
+        _currentSession.InputManager.GridUpdate += HandleGridUpdate;
         
         if (OperatingSystem.IsBrowser()) {
             await LoadGrid(_puzzles.FirstOrDefault());
@@ -44,10 +37,6 @@ public partial class SudokuGrid : ComponentBase
     
     private async Task LoadSession(PuzzleModel puzzle) {
         _currentSession = _sessions.FirstOrDefault(s => s.Id == puzzle.Id)!;
-        
-        _selectionManager.SetCurrentSession(_currentSession);
-        _undoRedoService.SetCurrentSession(_currentSession);
-        _inputManager.SetCurrentSession(_currentSession);
 
         if (OperatingSystem.IsBrowser()) {
             await LoadGrid(puzzle);
@@ -69,7 +58,7 @@ public partial class SudokuGrid : ComponentBase
     }
     
     private void Solve() {
-        Console.WriteLine(SudokuSolver.IsSolved(_currentSession.Grid) ? "Solved" : "Not solved");
+        _isSolved = SudokuSolver.IsSolved(_currentSession.Grid);
     }
     
     private async void HandleGridUpdate(object? sender, EventArgs e) {
@@ -90,6 +79,6 @@ public partial class SudokuGrid : ComponentBase
     }
     
     public void Dispose() {
-        _inputManager.GridUpdate -= HandleGridUpdate;
+        _currentSession.InputManager.GridUpdate -= HandleGridUpdate;
     }
 }

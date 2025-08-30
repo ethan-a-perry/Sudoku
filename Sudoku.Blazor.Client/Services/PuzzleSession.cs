@@ -10,19 +10,28 @@ public class PuzzleSession
 {
     public string Id { get; set; }
     public Grid Grid { get; set; }
-    
-    public SnapshotManager SnapshotManager { get; set; } = new();
-    
-    public InputMode InputMode { get; set; } = InputMode.Digit;
-    public SelectionMode SelectionMode { get; set; } = SelectionMode.Regular;
-    
-    public LinkedHashSet<Cell> SelectedCells { get; set; } = [];
-    public IEnumerable<Cell> EditableCells => SelectedCells.Where(c => !c.IsGiven);
+
+    public InputManager InputManager { get; set; }
+    public SelectionManager SelectionManager { get; set; }
+    public UndoRedoService UndoRedoService { get; set; }
+
+    public PuzzleSession() {
+        Id = string.Empty;
+        Grid = new Grid();
+        
+        SelectionManager = new SelectionManager();
+        UndoRedoService = new UndoRedoService(Grid, SelectionManager);
+        InputManager = new InputManager(Grid, SelectionManager, UndoRedoService);
+    }
 
     public PuzzleSession(PuzzleModel puzzle) {
         Id = puzzle.Id;
         
         Grid = new Grid(puzzle.NumRows, puzzle.NumCols);
         Grid.LoadPuzzle(puzzle.Grid);
+        
+        SelectionManager = new SelectionManager();
+        UndoRedoService = new UndoRedoService(Grid, SelectionManager);
+        InputManager = new InputManager(Grid, SelectionManager, UndoRedoService);
     }
 }

@@ -1,20 +1,19 @@
 using Microsoft.AspNetCore.Components.Web;
 using Sudoku.Core.Enums;
+using Sudoku.Core.Models;
 
 namespace Sudoku.Blazor.Client.Services;
 
-public class InputManager(PuzzleSession currentSession, SelectionManager selectionManager, UndoRedoService undoRedoService)
+public class InputManager(Grid grid, SelectionManager selectionManager, UndoRedoService undoRedoService)
 {
-    private PuzzleSession _currentSession = currentSession;
+    public InputMode InputMode { get; set; } = InputMode.Digit;
+    public IEnumerable<Cell> EditableCells => selectionManager.EditableCells;
+    
 
     private bool _isMouseDown;
     private bool _isShiftKeyDown;
 
     public event EventHandler? GridUpdate;
-
-    public void SetCurrentSession(PuzzleSession newSession) {
-        _currentSession = newSession;
-    }
 
     public void FilterKeyboardEvent(KeyboardEventArgs e) {
         switch (e.Key.ToLowerInvariant()) {
@@ -41,7 +40,7 @@ public class InputManager(PuzzleSession currentSession, SelectionManager selecti
                 HandleUnset();
                 break;
             case "Tab":
-                _currentSession.InputMode = _currentSession.InputMode switch {
+                InputMode = InputMode switch {
                     InputMode.Digit => InputMode.CenterPencilMark,
                     InputMode.CenterPencilMark => InputMode.CornerPencilMark,
                     InputMode.CornerPencilMark => InputMode.Digit,
@@ -58,36 +57,36 @@ public class InputManager(PuzzleSession currentSession, SelectionManager selecti
                     _ => (0, 0)
                 };
                 
-                selectionManager.TraverseGrid(_currentSession.Grid, row, col);
+                selectionManager.TraverseGrid(grid, row, col);
                 break;
         }
     }
 
     public void HandleSet(char input) {
         undoRedoService.RecordSnapshot(() => {
-            switch (_currentSession.InputMode) {
+            switch (InputMode) {
                 case InputMode.Digit:
-                    if (_currentSession.EditableCells.All(c => c.Value == input)) {
-                        _currentSession.Grid.UnsetDigit(_currentSession.EditableCells);
+                    if (EditableCells.All(c => c.Value == input)) {
+                        grid.UnsetDigit(EditableCells);
                     }
                     else {
-                        _currentSession.Grid.SetDigit(_currentSession.EditableCells, input);
+                        grid.SetDigit(EditableCells, input);
                     }
                     break;
                 case InputMode.CornerPencilMark:
-                    if (_currentSession.EditableCells.All(c => c.PencilMarks.Corner.Contains(input))) {
-                        _currentSession.Grid.UnsetCornerPencilMark(_currentSession.EditableCells, input);
+                    if (EditableCells.All(c => c.PencilMarks.Corner.Contains(input))) {
+                        grid.UnsetCornerPencilMark(EditableCells, input);
                     }
                     else {
-                        _currentSession.Grid.SetCornerPencilMark(_currentSession.EditableCells, input);
+                        grid.SetCornerPencilMark(EditableCells, input);
                     }
                     break;
                 case InputMode.CenterPencilMark:
-                    if (_currentSession.EditableCells.All(c => c.PencilMarks.Center.Contains(input))) {
-                        _currentSession.Grid.UnsetCenterPencilMark(_currentSession.EditableCells, input);
+                    if (EditableCells.All(c => c.PencilMarks.Center.Contains(input))) {
+                        grid.UnsetCenterPencilMark(EditableCells, input);
                     }
-                    else {
-                        _currentSession.Grid.SetCenterPencilMark(_currentSession.EditableCells, input);
+                    else { 
+                        grid.SetCenterPencilMark(EditableCells, input);
                     }
                     break;
             }
@@ -99,23 +98,23 @@ public class InputManager(PuzzleSession currentSession, SelectionManager selecti
     public void HandleUnset() {
         undoRedoService.RecordSnapshot(() => {
             // If any cells have Digits, remove then return
-            if (_currentSession.EditableCells.Any(c => c.Value is not '\0')) {
-                _currentSession.Grid.UnsetDigit(_currentSession.EditableCells);
+            if (EditableCells.Any(c => c.Value is not '\0')) {
+                grid.UnsetDigit(EditableCells);
                 return;
             }
         
             // If any of the cells have corner pencil marks,
             // check if the input mode is not a CenterPencilMark or if no center pencil marks exist.
             // If these pass, remove corner pencil marks
-            if (_currentSession.EditableCells.Any(c => c.PencilMarks.Corner.Count > 0)) {
-                if (_currentSession.InputMode is not InputMode.CenterPencilMark || _currentSession.EditableCells.Any(c => c.PencilMarks.Center.Count == 0)) { 
-                    _currentSession.Grid.UnsetCornerPencilMarks(_currentSession.EditableCells);
+            if (EditableCells.Any(c => c.PencilMarks.Corner.Count > 0)) {
+                if (InputMode is not InputMode.CenterPencilMark || EditableCells.Any(c => c.PencilMarks.Center.Count == 0)) { 
+                    grid.UnsetCornerPencilMarks(EditableCells);
                     return;
                 }
             }
         
             // Remove all center pencil marks
-            _currentSession.Grid.UnsetCenterPencilMarks(_currentSession.EditableCells);
+            grid.UnsetCenterPencilMarks(EditableCells);
         });
         
         GridUpdate?.Invoke(this, EventArgs.Empty);
@@ -126,7 +125,7 @@ public class InputManager(PuzzleSession currentSession, SelectionManager selecti
         if (e.Button != 0) return;
         _isMouseDown = true;
         
-        selectionManager.HandleMouseDown(_currentSession.Grid.GetCell(row, col), _isShiftKeyDown);
+        selectionManager.HandleMouseDown(grid.GetCell(row, col), _isShiftKeyDown);
     }
     
     public void OnMouseUp() {
@@ -139,7 +138,7 @@ public class InputManager(PuzzleSession currentSession, SelectionManager selecti
     /// </summary>
     public void OnMouseEnter(int row, int col) {
         if (!_isMouseDown) return;
-        selectionManager.HandleMouseEnter(_currentSession.Grid.GetCell(row, col));
+        selectionManager.HandleMouseEnter(grid.GetCell(row, col));
     }
     
     public void OnKeyDown(KeyboardEventArgs e) {

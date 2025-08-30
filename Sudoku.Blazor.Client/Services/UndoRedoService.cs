@@ -1,45 +1,43 @@
 using Sudoku.Core.Models;
 using Sudoku.Core.Records;
+using Sudoku.DataAccess.Services;
 
 namespace Sudoku.Blazor.Client.Services;
 
-public class UndoRedoService(PuzzleSession currentSession, SelectionManager selectionManager)
+public class UndoRedoService(Grid grid, SelectionManager selectionManager)
 {
-    private PuzzleSession _currentSession = currentSession;
-
-    public void SetCurrentSession(PuzzleSession newSession) {
-        _currentSession = newSession;
-    }
+    public SnapshotManager SnapshotManager { get; set; } = new();
+    public IEnumerable<Cell> EditableCells => selectionManager.EditableCells;
     
     public void RecordSnapshot(Action applyInput) {
-        var before = _currentSession.EditableCells.Select(CellState.FromCell).ToList();
+        var before = EditableCells.Select(CellState.FromCell).ToList();
         
         applyInput();
         
-        var after = _currentSession.EditableCells.Select(CellState.FromCell).ToList();
+        var after = EditableCells.Select(CellState.FromCell).ToList();
 
-        _currentSession.SnapshotManager.Record(new Snapshot(before, after));
+        SnapshotManager.Record(new Snapshot(before, after));
     }
     
     public void RestoreSnapshot(List<CellState> cellStates) {
         selectionManager.DeselectAllCells();
         
         foreach (var cellState in cellStates) {
-            var cell = _currentSession.Grid.GetCell(cellState.Row, cellState.Col);
+            var cell = grid.GetCell(cellState.Row, cellState.Col);
             char value = cellState.Value;
             
             selectionManager.SelectCell(cell);
-            _currentSession.Grid.SetDigit(cell, value);
+            grid.SetDigit(cell, value);
         }
     }
 	
     public void Undo() {
-        var snapshot = _currentSession.SnapshotManager.Undo();
+        var snapshot = SnapshotManager.Undo();
         RestoreSnapshot(snapshot.Before);
     }
 	
     public void Redo() {
-        var snapshot = _currentSession.SnapshotManager.Redo();
+        var snapshot = SnapshotManager.Redo();
         RestoreSnapshot(snapshot.After);
     }
 }
