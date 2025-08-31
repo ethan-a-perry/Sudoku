@@ -14,7 +14,7 @@ public partial class SudokuGrid : ComponentBase
     private List<PuzzleModel> _puzzles = [];
     
     private List<PuzzleSession> _sessions = [];
-    private PuzzleSession _currentSession = new();
+    private PuzzleSession _currentSession;
     
     private SudokuSolver SudokuSolver { get; set; } = new();
     private bool _isSolved;
@@ -35,11 +35,15 @@ public partial class SudokuGrid : ComponentBase
         }
     }
     
-    private async Task LoadSession(PuzzleModel puzzle) {
-        _currentSession = _sessions.FirstOrDefault(s => s.Id == puzzle.Id)!;
-
+    private async Task LoadSession(ChangeEventArgs e) {
+        var puzzleId = e.Value is not null ? (string)e.Value : string.Empty;
+        
+        if (string.IsNullOrEmpty(puzzleId)) return;
+        
+        _currentSession = _sessions.FirstOrDefault(s => s.Puzzle.Id == puzzleId)!;
+    
         if (OperatingSystem.IsBrowser()) {
-            await LoadGrid(puzzle);
+            await LoadGrid(_currentSession.Puzzle);
         }
     }
 
@@ -63,7 +67,7 @@ public partial class SudokuGrid : ComponentBase
     
     private async void HandleGridUpdate(object? sender, EventArgs e) {
         try {
-            await PuzzleStorageService.SaveGrid(_currentSession.Id, _currentSession.Grid);
+            await PuzzleStorageService.SaveGrid(_currentSession.Puzzle.Id, _currentSession.Grid);
         }
         catch (Exception ex) {
             await Console.Error.WriteLineAsync($"Failed to save puzzle: {ex}");
@@ -71,11 +75,11 @@ public partial class SudokuGrid : ComponentBase
     }
 
     private async Task Restart() {
-        var currentPuzzle = _puzzles.FirstOrDefault(p => p.Id == _currentSession.Id);
+        var currentPuzzle = _puzzles.FirstOrDefault(p => p.Id == _currentSession.Puzzle.Id);
 
         _currentSession = new PuzzleSession(currentPuzzle);
         
-        await PuzzleStorageService.SaveGrid(_currentSession.Id, _currentSession.Grid);
+        await PuzzleStorageService.SaveGrid(_currentSession.Puzzle.Id, _currentSession.Grid);
     }
     
     public void Dispose() {

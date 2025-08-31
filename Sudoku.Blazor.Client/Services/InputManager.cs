@@ -6,7 +6,7 @@ namespace Sudoku.Blazor.Client.Services;
 
 public class InputManager(Grid grid, SelectionManager selectionManager, UndoRedoService undoRedoService)
 {
-    public InputMode InputMode { get; set; } = InputMode.Digit;
+    public InputMode InputMode { get; set; } = InputMode.Normal;
     public IEnumerable<Cell> EditableCells => selectionManager.EditableCells;
     
 
@@ -41,9 +41,9 @@ public class InputManager(Grid grid, SelectionManager selectionManager, UndoRedo
                 break;
             case "Tab":
                 InputMode = InputMode switch {
-                    InputMode.Digit => InputMode.CenterPencilMark,
-                    InputMode.CenterPencilMark => InputMode.CornerPencilMark,
-                    InputMode.CornerPencilMark => InputMode.Digit,
+                    InputMode.Normal => InputMode.Center,
+                    InputMode.Center => InputMode.Corner,
+                    InputMode.Corner => InputMode.Normal,
                     _ => throw new ArgumentOutOfRangeException()
                 };
                 break;
@@ -65,7 +65,7 @@ public class InputManager(Grid grid, SelectionManager selectionManager, UndoRedo
     public void HandleSet(char input) {
         undoRedoService.RecordSnapshot(() => {
             switch (InputMode) {
-                case InputMode.Digit:
+                case InputMode.Normal:
                     if (EditableCells.All(c => c.Value == input)) {
                         grid.UnsetDigit(EditableCells);
                     }
@@ -73,7 +73,7 @@ public class InputManager(Grid grid, SelectionManager selectionManager, UndoRedo
                         grid.SetDigit(EditableCells, input);
                     }
                     break;
-                case InputMode.CornerPencilMark:
+                case InputMode.Corner:
                     if (EditableCells.All(c => c.PencilMarks.Corner.Contains(input))) {
                         grid.UnsetCornerPencilMark(EditableCells, input);
                     }
@@ -81,7 +81,7 @@ public class InputManager(Grid grid, SelectionManager selectionManager, UndoRedo
                         grid.SetCornerPencilMark(EditableCells, input);
                     }
                     break;
-                case InputMode.CenterPencilMark:
+                case InputMode.Center:
                     if (EditableCells.All(c => c.PencilMarks.Center.Contains(input))) {
                         grid.UnsetCenterPencilMark(EditableCells, input);
                     }
@@ -107,7 +107,7 @@ public class InputManager(Grid grid, SelectionManager selectionManager, UndoRedo
             // check if the input mode is not a CenterPencilMark or if no center pencil marks exist.
             // If these pass, remove corner pencil marks
             if (EditableCells.Any(c => c.PencilMarks.Corner.Count > 0)) {
-                if (InputMode is not InputMode.CenterPencilMark || EditableCells.Any(c => c.PencilMarks.Center.Count == 0)) { 
+                if (InputMode is not InputMode.Center || EditableCells.Any(c => c.PencilMarks.Center.Count == 0)) { 
                     grid.UnsetCornerPencilMarks(EditableCells);
                     return;
                 }
@@ -150,6 +150,10 @@ public class InputManager(Grid grid, SelectionManager selectionManager, UndoRedo
     
     public void OnKeyUp(KeyboardEventArgs e) {
         _isShiftKeyDown = e.ShiftKey;
+    }
+
+    public void SetInputMode(InputMode newMode) {
+        InputMode = newMode;
     }
     
     public void Undo() {

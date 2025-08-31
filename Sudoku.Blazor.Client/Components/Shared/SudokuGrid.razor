@@ -1,63 +1,105 @@
-@using Sudoku.Core.Models
+@using Sudoku.Core.Enums
+
+@if (_currentSession is not null) {
+
 <div class="sudoku">
-    <div class="grid @(_isSolved ? "solved" : "")" tabindex="-1" @onkeydown="_currentSession.InputManager.OnKeyDown" @onkeyup="_currentSession.InputManager.OnKeyUp" @onkeydown:preventDefault="true">
+    <div class="sudoku--grid--wrapper">
+        <div class="sudoku--grid @(_isSolved ? "solved" : "")" tabindex="-1" @onkeydown="_currentSession.InputManager.OnKeyDown" @onkeyup="_currentSession.InputManager.OnKeyUp" @onkeydown:preventDefault="true">
+            @* @{ var cells = _currentSession?.Grid != null ? _currentSession.Grid.GetCells() : new Grid().GetCells(); } *@
+            @foreach (var cell in _currentSession.Grid.GetCells()) {
+                var row = cell.Row;
+                var col = cell.Col;
+                <div
+                    class="cell @(cell.IsGiven ? "is-given" : "")"
+                    aria-selected="@(_currentSession.SelectionManager.IsCellSelected(cell) ? "true" : "false")"
+                    @onmousedown="e => _currentSession.InputManager.OnMouseDown(e, row, col)"
+                    @onmouseup="() => _currentSession.InputManager.OnMouseUp()"
+                    @onmouseenter="() => _currentSession.InputManager.OnMouseEnter(row, col)">
+
+                    @if (cell.Value is not '\0') {
+                        @cell.Value
+                    }
+                    else {
+                        if (cell.PencilMarks.Corner.Count > 0) {
+                            int index = 1;
+                            <div class="pencil-marks corner">
+                                @foreach (var pencilMark in cell.PencilMarks.Corner) {
+                                    <span class="pencil-mark @($"p{index}")">@pencilMark</span>
+                                    index++;
+                                }
+                            </div>
+                        }
+
+                        if (cell.PencilMarks.Center.Count > 0) {
+                            <div class="pencil-marks center @(cell.PencilMarks.Center.Count == 8 ? "eight-digits" : "") @(cell.PencilMarks.Center.Count == 9 ? "nine-digits" : "")">
+                                @foreach (var pencilMark in cell.PencilMarks.Center) {
+                                    <span class="pencil-mark">@pencilMark</span>
+                                }
+                            </div>
+                        }
+                    }
+                </div>
+            }
+        </div>
+    </div>
     
-        @{ var cells = _currentSession?.Grid != null ? _currentSession.Grid.GetCells() : new Grid().GetCells(); }
-        @foreach (var cell in cells) {
-            var row = cell.Row;
-            var col = cell.Col;
-            <div
-                class="cell"
-                aria-selected="@(_currentSession.SelectionManager.IsCellSelected(cell) ? "true" : "false")"
-                @onmousedown="e => _currentSession.InputManager.OnMouseDown(e, row, col)"
-                @onmouseup="() => _currentSession.InputManager.OnMouseUp()"
-                @onmouseenter="() => _currentSession.InputManager.OnMouseEnter(row, col)">
+    <div class="sudoku--toolbar">
+        <div class="sudoku--info">
+            <div class="puzzle-title">
+                <h2>@_currentSession.Puzzle.Title</h2>
+                <button @onclick="Restart" class="restart">Restart</button>
+            </div>
+
+            <div class="author">
+                <p>by @_currentSession.Puzzle.Constructor</p>
+                <span class="difficulty fs-s">@_currentSession.Puzzle.Difficulty</span>
+            </div>
             
-                @if (cell.Value is not '\0') {
-                    @cell.Value
-                }
-                else {
-                    if (cell.PencilMarks.Corner.Count > 0) {
-                        int index = 1;
-                        <div class="pencil-marks corner">
-                            @foreach (var pencilMark in cell.PencilMarks.Corner) {
-                                <span class="pencil-mark @($"p{index}")">@pencilMark</span>
-                                index++;
-                            }
-                        </div>
+            <div class="option">
+                <label for="difficulty-select"></label>
+                <select name="difficulties" id="difficulty-select" @onchange="LoadSession">
+                    <option value="" disabled selected>Change puzzle</option>
+                    @foreach (var puzzle in _puzzles) {
+                        <option value="@puzzle.Id">@puzzle.Difficulty</option>
                     }
-            
-                    if (cell.PencilMarks.Center.Count > 0) {
-                        <div class="pencil-marks center @(cell.PencilMarks.Center.Count == 8 ? "eight-digits" : "") @(cell.PencilMarks.Center.Count == 9 ? "nine-digits" : "")">
-                            @foreach (var pencilMark in cell.PencilMarks.Center) {
-                                <span class="pencil-mark">@pencilMark</span>
-                            }
-                        </div>
-                    }
+                </select>
+            </div>
+
+            <div class="option">
+                <label for="theme-select"></label>
+                <select name="themes" id="theme-select">
+                    <option value="" disabled selected>Change theme</option>
+                    <option value="Standard">Standard</option>
+                    <option value="Persona">Persona</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="sudoku--hud">
+            <div class="input-mode-toggle">
+                @foreach (InputMode mode in Enum.GetValues(typeof(InputMode))) {
+                    <button class="@(_currentSession.InputManager.InputMode == mode ? "selected" : "")" @onclick="() => _currentSession.InputManager.SetInputMode(mode)">@mode.ToString()</button>
                 }
             </div>
-        }
-    </div>
 
-    <button @onclick="_currentSession.InputManager.Undo">Undo</button>
-    <button @onclick="_currentSession.InputManager.Redo">Redo</button>
-    
-    <div class="digits @_currentSession.InputManager.InputMode.ToString().ToLower()">
-        @for (int i = 1; i <= 9; i++) {
-            var value = (char)('0' + i);
-            <button @onclick="() => _currentSession.InputManager.HandleSet(value)">
-                <span class="@("p" + i)">@i</span>
-            </button>
-        }
+            <div class="sudoku--controls @_currentSession.InputManager.InputMode.ToString().ToLower()">
+                <button class="p0"  @onclick="() => _currentSession.InputManager.HandleSet('0')">0</button>
+                @for (int i = 1; i <= 9; i++) {
+                    var value = (char)('0' + i);
+                    <button @onclick="() => _currentSession.InputManager.HandleSet(value)">@i</button>
+                }
+            </div>
+            
+            <div class="tools">
+                <button @onclick="_currentSession.InputManager.HandleUnset">X</button>
+                <button @onclick="_currentSession.InputManager.Undo">Undo</button>
+                <button @onclick="_currentSession.InputManager.Redo">Redo</button>
+                <button @onclick="Solve">Check</button>
+            </div>
+        </div>
     </div>
-    
-    <ul>
-        @foreach (var puzzle in _puzzles) {
-            <li @onclick="@(() => LoadSession(puzzle))">@puzzle.Title by @puzzle.Constructor</li>
-        }
-    </ul>
-    
-    <a @onclick="Solve">Check solution</a>
-    
-    <button @onclick="Restart">Restart</button>
 </div>
+}
+else {
+    <p>loading</p>
+}

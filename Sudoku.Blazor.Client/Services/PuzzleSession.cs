@@ -8,7 +8,7 @@ namespace Sudoku.Blazor.Client.Services;
 
 public class PuzzleSession
 {
-    public string Id { get; set; }
+    public PuzzleModel Puzzle { get; set; }
     public Grid Grid { get; set; }
 
     public InputManager InputManager { get; set; }
@@ -16,7 +16,6 @@ public class PuzzleSession
     public UndoRedoService UndoRedoService { get; set; }
 
     public PuzzleSession() {
-        Id = string.Empty;
         Grid = new Grid();
         
         SelectionManager = new SelectionManager();
@@ -25,7 +24,7 @@ public class PuzzleSession
     }
 
     public PuzzleSession(PuzzleModel puzzle) {
-        Id = puzzle.Id;
+        Puzzle = puzzle;
         
         Grid = new Grid(puzzle.NumRows, puzzle.NumCols);
         Grid.LoadPuzzle(puzzle.Grid);
