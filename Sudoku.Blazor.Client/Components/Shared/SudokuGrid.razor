@@ -1,9 +1,14 @@
 @using Sudoku.Core.Enums
 
-@if (_currentSession is not null) {
-<div class="sudoku" @onclick:stopPropagation>
+<div 
+    class="sudoku"
+    tabindex="0"
+    @onkeydown="_currentSession.InputManager.OnKeyDown"
+    @onkeydown:preventDefault="true"
+    @onkeyup="_currentSession.InputManager.OnKeyUp"
+>
     <div class="sudoku--grid--wrapper">
-        <div class="sudoku--grid @(_isSolved ? "solved" : "")" tabindex="-1" @onkeydown="_currentSession.InputManager.OnKeyDown" @onkeyup="_currentSession.InputManager.OnKeyUp" @onkeydown:preventDefault="true">
+        <div class="sudoku--grid @(_isSolved ? "solved" : "")">
             @foreach (var cell in _currentSession.Grid.GetCells()) {
                 var row = cell.Row;
                 var col = cell.Col;
@@ -84,7 +89,7 @@
         <div class="sudoku--info">
             <div class="puzzle-title">
                 <h2>@_currentSession.Puzzle.Title</h2>
-                <button class="restart" @onclick="OpenRestartModal">Restart</button>
+                <button class="restart" @onclick="OpenRestartModal"><svg><use href="/assets/icons/icons.svg#restart-alt" /></svg></button>
             </div>
 
             <div class="author">
@@ -128,15 +133,11 @@
             </div>
             
             <div class="tools">
-                <button @onclick="_currentSession.InputManager.HandleUnset">X</button>
-                <button @onclick="_currentSession.InputManager.Undo">Undo</button>
-                <button @onclick="_currentSession.InputManager.Redo">Redo</button>
-                <button @onclick="Solve">Check</button>
+                <button @onclick="_currentSession.InputManager.HandleUnset"><svg><use href="/assets/icons/icons.svg#close" /></svg></button>
+                <button @onclick="_currentSession.InputManager.Undo"><svg><use href="/assets/icons/icons.svg#undo" /></svg></button>
+                <button @onclick="_currentSession.InputManager.Redo"><svg><use href="/assets/icons/icons.svg#redo" /></svg></button>
+                <button @onclick="Solve"><svg><use href="/assets/icons/icons.svg#check" /></svg></button>
             </div>
         </div>
     </div>
 </div>
-}
-else {
-    <p>loading</p>
-}

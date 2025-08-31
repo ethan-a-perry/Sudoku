@@ -6,7 +6,7 @@ namespace Sudoku.DataAccess.Data;
 public class JsonPuzzleData : IPuzzleData
 {
     private readonly HttpClient _httpClient;
-    private const string RequestUri = "/data/puzzles.json";
+    private const string RequestUri = "/sudoku/data/puzzles.json";
 
     public JsonPuzzleData(HttpClient httpClient) {
         _httpClient = httpClient;
