@@ -12,15 +12,15 @@ public class SudokuSolver
     public bool IsSolved(Grid grid) {
         HashSet<string> seen = [];
 
-        for (int r = 0; r < GridRows; r++) {
-            for (int c = 0; c < GridCols; c++) {
-                char? value = grid.GetCell(r, c).Value;
+        for (int row = 0; row < GridRows; row++) {
+            for (int col = 0; col < GridCols; col++) {
+                char? value = grid.GetCell(row, col).Value;
 
-                if (value == 0 || value is null) return false;
-
-                string rowKey = $"{value} in row {r}";
-                string colKey = $"{value} in col {c}";
-                string boxKey = $"{value} in box {r / BoxRows}:{c / BoxCols}";
+                if (value is < '1' or > '9') return false;
+                
+                string rowKey = $"{value} in row {row}";
+                string colKey = $"{value} in col {col}";
+                string boxKey = $"{value} in box {row / BoxRows}:{col / BoxCols}";
 
                 if (!seen.Add(rowKey) || !seen.Add(colKey) || !seen.Add(boxKey)) return false;
             }
