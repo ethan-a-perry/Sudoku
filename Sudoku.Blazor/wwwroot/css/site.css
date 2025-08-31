@@ -65,6 +65,7 @@ main {
 }
 
 .sudoku--grid--wrapper {
+    position: relative;
     width: 100%;
 }
 
@@ -394,6 +395,78 @@ main {
             width: 16px;
             height: 16px;
             fill: currentColor;
+        }
+    }
+}
+
+
+
+
+
+.modal--overlay {
+    position: absolute;
+    height: 100%;
+    width: 100%;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0, 0, 0, 0.4);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal--box {
+    position: relative;
+    background: var(--color-site-background);
+    padding: 1rem 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+    width: 70%;
+    max-height: 80vh;
+
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+
+    & .modal--options {
+        display: flex;
+        gap: 1rem;
+
+        & button {
+            border: 1px solid var(--color-text-65);
+            border-radius: 5px;
+
+            padding: 5px 14px;
+
+            &.stop {
+                background-color: var(--color-accent-secondary-100);
+                color: white;
+            }
+
+            &.go {
+                background-color: var(--color-accent-15);
+                color: var(--color-text-65);
+            }
+
+            &.hold {
+                background-color: #ddeada;
+                color: var(--color-text-65);
+            }
+        }
+    }
+
+    & .close {
+        position: absolute;
+        top: 0;
+        right: 0;
+        padding: 10px;
+
+        & svg {
+            width: 20px;
+            height: 20px;
         }
     }
 }

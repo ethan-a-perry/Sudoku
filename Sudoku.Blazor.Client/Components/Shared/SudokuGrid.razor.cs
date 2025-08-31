@@ -18,7 +18,10 @@ public partial class SudokuGrid : ComponentBase
     
     private SudokuSolver SudokuSolver { get; set; } = new();
     private bool _isSolved;
-    
+
+    private bool isRestartModalVisible;
+    private bool isSolveModalVisible;
+
     protected override async Task OnInitializedAsync() {
         _puzzles = await PuzzleData.GetAllPuzzles();
         
@@ -63,6 +66,7 @@ public partial class SudokuGrid : ComponentBase
     
     private void Solve() {
         _isSolved = SudokuSolver.IsSolved(_currentSession.Grid);
+        OpenSolveModal();
     }
     
     private async void HandleGridUpdate(object? sender, EventArgs e) {
@@ -75,11 +79,19 @@ public partial class SudokuGrid : ComponentBase
     }
 
     private async Task Restart() {
+        CloseModal();
         var currentPuzzle = _puzzles.FirstOrDefault(p => p.Id == _currentSession.Puzzle.Id);
 
         _currentSession = new PuzzleSession(currentPuzzle);
         
         await PuzzleStorageService.SaveGrid(_currentSession.Puzzle.Id, _currentSession.Grid);
+    }
+    
+    private void OpenRestartModal() => isRestartModalVisible = true;
+    private void OpenSolveModal() => isSolveModalVisible = true;
+    private void CloseModal() {
+        isRestartModalVisible = false;
+        isSolveModalVisible = false;
     }
     
     public void Dispose() {
