@@ -73,7 +73,9 @@ public class Grid
     
     public void SetCornerPencilMark(IEnumerable<Cell> cells, char value) {
         foreach (Cell cell in cells) {
-            cell.PencilMarks.Corner.Add(value);
+            if (cell.Value is '\0') {
+                cell.PencilMarks.Corner.Add(value);
+            }
         }
     }
     
@@ -91,7 +93,9 @@ public class Grid
     
     public void SetCenterPencilMark(IEnumerable<Cell> cells, char value) {
         foreach (Cell cell in cells) {
-            cell.PencilMarks.Center.Add(value);
+            if (cell.Value is '\0') {
+                cell.PencilMarks.Center.Add(value);
+            }
         }
     }
     
