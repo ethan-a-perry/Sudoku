@@ -64,30 +64,6 @@ public partial class SudokuGrid : ComponentBase
         }
     }
     
-    private void Solve() {
-        _isSolved = SudokuSolver.IsSolved(_currentSession.Grid);
-        OpenSolveModal();
-    }
-    
-    private async void HandleGridUpdate(object? sender, EventArgs e) {
-        try {
-            await PuzzleStorageService.SaveGrid(_currentSession.Puzzle.Id, _currentSession.Grid);
-        }
-        catch (Exception ex) {
-            await Console.Error.WriteLineAsync($"Failed to save puzzle: {ex}");
-        }
-    }
-
-    private async Task Restart() {
-        _isSolved = false;
-        CloseModal();
-        var currentPuzzle = _puzzles.FirstOrDefault(p => p.Id == _currentSession.Puzzle.Id);
-
-        _currentSession = new PuzzleSession(currentPuzzle);
-        
-        await PuzzleStorageService.SaveGrid(_currentSession.Puzzle.Id, _currentSession.Grid);
-    }
-    
     private void OpenRestartModal() {
         isSolveModalVisible = false;
         isRestartModalVisible = true;
@@ -101,6 +77,30 @@ public partial class SudokuGrid : ComponentBase
     private void CloseModal() {
         isRestartModalVisible = false;
         isSolveModalVisible = false;
+    }
+    
+    private async Task Restart() {
+        _isSolved = false;
+        CloseModal();
+        var currentPuzzle = _puzzles.FirstOrDefault(p => p.Id == _currentSession.Puzzle.Id);
+
+        _currentSession = new PuzzleSession(currentPuzzle);
+        
+        await PuzzleStorageService.SaveGrid(_currentSession.Puzzle.Id, _currentSession.Grid);
+    }
+    
+    private void Solve() {
+        _isSolved = SudokuSolver.IsSolved(_currentSession.Grid);
+        OpenSolveModal();
+    }
+    
+    private async void HandleGridUpdate(object? sender, EventArgs e) {
+        try {
+            await PuzzleStorageService.SaveGrid(_currentSession.Puzzle.Id, _currentSession.Grid);
+        }
+        catch (Exception ex) {
+            await Console.Error.WriteLineAsync($"Failed to save puzzle: {ex}");
+        }
     }
     
     public void Dispose() {

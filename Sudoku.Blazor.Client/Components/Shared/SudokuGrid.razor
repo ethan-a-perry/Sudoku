@@ -89,7 +89,7 @@
         <div class="sudoku--info">
             <div class="puzzle-title">
                 <h2>@_currentSession.Puzzle.Title</h2>
-                <button class="restart" @onclick="OpenRestartModal"><svg><use href="/assets/icons/icons.svg#restart-alt" /></svg></button>
+                <button title="restart puzzle" class="restart" @onclick="OpenRestartModal"><svg><use href="/assets/icons/icons.svg#restart-alt" /></svg></button>
             </div>
 
             <div class="author">
@@ -100,7 +100,7 @@
             <div class="option">
                 <label for="difficulty-select"></label>
                 <select name="difficulties" id="difficulty-select" @onchange="LoadSession">
-                    <option value="" disabled selected>Change puzzle</option>
+                    <option value="" disabled selected hidden>Change puzzle</option>
                     @foreach (var puzzle in _puzzles) {
                         <option value="@puzzle.Id">@puzzle.Difficulty</option>
                     }
@@ -110,9 +110,9 @@
             <div class="option">
                 <label for="theme-select"></label>
                 <select name="themes" id="theme-select">
-                    <option value="" disabled selected>Change theme</option>
-                    <option value="Standard">Standard</option>
-                    <option value="Persona">Persona</option>
+                    <option value="" disabled selected hidden>Change theme</option>
+                    <option value="Light">Light</option>
+                    <option value="Dark">Dark</option>
                 </select>
             </div>
         </div>
