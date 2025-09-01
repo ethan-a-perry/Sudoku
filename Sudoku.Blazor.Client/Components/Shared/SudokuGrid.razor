@@ -1,143 +1,144 @@
 @using Sudoku.Core.Enums
 
-<div 
-    class="sudoku"
-    tabindex="0"
-    @onkeydown="_currentSession.InputManager.OnKeyDown"
-    @onkeydown:preventDefault="true"
-    @onkeyup="_currentSession.InputManager.OnKeyUp"
->
-    <div class="sudoku--grid--wrapper">
-        <div class="sudoku--grid @(_isSolved ? "solved" : "")">
-            @foreach (var cell in _currentSession.Grid.GetCells()) {
-                var row = cell.Row;
-                var col = cell.Col;
-                <div
-                    class="cell @(cell.IsGiven ? "is-given" : "")"
-                    aria-selected="@(_currentSession.SelectionManager.IsCellSelected(cell) ? "true" : "false")"
-                    @onmousedown="e => _currentSession.InputManager.OnMouseDown(e, row, col)"
-                    @onmouseup="() => _currentSession.InputManager.OnMouseUp()"
-                    @onmouseenter="() => _currentSession.InputManager.OnMouseEnter(row, col)">
+@if (_currentSession is not null) {
+    <div
+        class="sudoku"
+        tabindex="0"
+        @onkeydown="_currentSession.InputManager.OnKeyDown"
+        @onkeydown:preventDefault="true"
+        @onkeyup="_currentSession.InputManager.OnKeyUp">
+        <div class="sudoku--grid--wrapper">
+            <div class="sudoku--grid @(_isSolved ? "solved" : "")">
+                @foreach (var cell in _currentSession.Grid.GetCells()) {
+                    var row = cell.Row;
+                    var col = cell.Col;
+                    <div
+                        class="cell @(cell.IsGiven ? "is-given" : "")"
+                        aria-selected="@(_currentSession.SelectionManager.IsCellSelected(cell) ? "true" : "false")"
+                        @onmousedown="e => _currentSession.InputManager.OnMouseDown(e, row, col)"
+                        @onmouseup="() => _currentSession.InputManager.OnMouseUp()"
+                        @onmouseenter="() => _currentSession.InputManager.OnMouseEnter(row, col)">
 
-                    @if (cell.Value is not '\0') {
-                        @cell.Value
-                    }
-                    else {
-                        if (cell.PencilMarks.Corner.Count > 0) {
-                            int index = 1;
-                            <div class="pencil-marks corner">
-                                @foreach (var pencilMark in cell.PencilMarks.Corner) {
-                                    <span class="pencil-mark @($"p{index}")">@pencilMark</span>
-                                    index++;
-                                }
+                        @if (cell.Value is not '\0') {
+                            @cell.Value
+                        }
+                        else {
+                            if (cell.PencilMarks.Corner.Count > 0) {
+                                int index = 1;
+                                <div class="pencil-marks corner">
+                                    @foreach (var pencilMark in cell.PencilMarks.Corner) {
+                                        <span class="pencil-mark @($"p{index}")">@pencilMark</span>
+                                        index++;
+                                    }
+                                </div>
+                            }
+
+                            if (cell.PencilMarks.Center.Count > 0) {
+                                <div class="pencil-marks center @(cell.PencilMarks.Center.Count == 8 ? "eight-digits" : "") @(cell.PencilMarks.Center.Count == 9 ? "nine-digits" : "")">
+                                    @foreach (var pencilMark in cell.PencilMarks.Center) {
+                                        <span class="pencil-mark">@pencilMark</span>
+                                    }
+                                </div>
+                            }
+                        }
+                    </div>
+                }
+            </div>
+
+            @if (_isRestartModalVisible) {
+                <div class="modal--overlay">
+                    <div class="modal--box">
+                        <h2>Confirm restart</h2>
+                        <p>Are you sure you want to restart the puzzle?</p>
+                        <div class="modal--options">
+                            <button class="stop" @onclick="CloseModal">Cancel</button>
+                            <button class="go" @onclick="Restart">Restart</button>
+                        </div>
+
+                        <button class="close" @onclick="CloseModal"><svg><use href="/assets/icons/icons.svg#close"/></svg></button>
+                    </div>
+                </div>
+            }
+
+            @if (_isSolveModalVisible) {
+                <div class="modal--overlay">
+                    <div class="modal--box">
+                        @if (_isSolved) {
+                            <h2>Congratulations, you solved it!</h2>
+                            <p>Great job — you can see the puzzle or restart a new session.</p>
+                            <div class="modal--options">
+                                <button class="hold" @onclick="CloseModal">See puzzle</button>
+                                <button class="go" @onclick="Restart">Restart</button>
+                            </div>
+                        }
+                        else {
+                            <h2>Oops :(</h2>
+                            <p>You're missing something.</p>
+                            <div class="modal--options">
+                                <button class="go" @onclick="CloseModal">Continue puzzle</button>
                             </div>
                         }
 
-                        if (cell.PencilMarks.Center.Count > 0) {
-                            <div class="pencil-marks center @(cell.PencilMarks.Center.Count == 8 ? "eight-digits" : "") @(cell.PencilMarks.Center.Count == 9 ? "nine-digits" : "")">
-                                @foreach (var pencilMark in cell.PencilMarks.Center) {
-                                    <span class="pencil-mark">@pencilMark</span>
-                                }
-                            </div>
-                        }
-                    }
+                        <button class="close" @onclick="CloseModal"><svg><use href="/assets/icons/icons.svg#close"/></svg></button>
+                    </div>
                 </div>
             }
         </div>
-        
-        @if (isRestartModalVisible) {
-            <div class="modal--overlay">
-                <div class="modal--box">
-                    <h2>Confirm restart</h2>
-                    <p>Are you sure you want to restart the puzzle?</p>
-                    <div class="modal--options">
-                        <button class="stop" @onclick="CloseModal">Cancel</button>
-                        <button class="go" @onclick="Restart">Restart</button>
-                    </div>
 
-                    <button class="close" @onclick="CloseModal"><svg><use href="/assets/icons/icons.svg#close" /></svg></button>
+        <div class="sudoku--toolbar">
+            <div class="sudoku--info">
+                <div class="puzzle-title">
+                    <h2>@_currentSession.Puzzle.Title</h2>
+                    <button title="restart puzzle" class="restart" @onclick="OpenRestartModal"><svg><use href="/assets/icons/icons.svg#restart-alt"/></svg></button>
+                </div>
+
+                <div class="author">
+                    <p>by @_currentSession.Puzzle.Constructor</p>
+                    <span class="difficulty fs-s">@_currentSession.Puzzle.Difficulty</span>
+                </div>
+
+                <div class="option">
+                    <label for="difficulty-select"></label>
+                    <select name="difficulties" id="difficulty-select" @onchange="LoadSession">
+                        <option value="" disabled selected hidden>Change puzzle</option>
+                        @foreach (var puzzle in _puzzles) {
+                            <option value="@puzzle.Id">@puzzle.Difficulty</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="option">
+                    <label for="theme-select"></label>
+                    <select name="themes" id="theme-select">
+                        <option value="" disabled selected hidden>Change theme</option>
+                        <option value="Light">Light</option>
+                        <option value="Dark">Dark</option>
+                    </select>
                 </div>
             </div>
-        }
-        
-        @if (isSolveModalVisible) {
-            <div class="modal--overlay">
-                <div class="modal--box">
-                    @if (_isSolved) {
-                        <h2>Congratulations, you solved it!</h2>
-                        <p>Great job — you can see the puzzle or restart a new session.</p>
-                        <div class="modal--options">
-                            <button class="hold" @onclick="CloseModal">See puzzle</button>
-                            <button class="go" @onclick="Restart">Restart</button>
-                        </div>
-                    }
-                    else {
-                        <h2>Oops :(</h2>
-                        <p>You're missing something.</p>
-                        <div class="modal--options">
-                            <button class="go" @onclick="CloseModal">Continue puzzle</button>
-                        </div>
-                    }
 
-                    <button class="close" @onclick="CloseModal"><svg><use href="/assets/icons/icons.svg#close"/></svg></button>
+            <div class="sudoku--hud">
+                <div class="input-mode-toggle">
+                    @foreach (InputMode mode in Enum.GetValues(typeof(InputMode))) {
+                        <button class="@(_currentSession.InputManager.InputMode == mode ? "selected" : "")" @onclick="() => _currentSession.InputManager.SetInputMode(mode)">@mode.ToString()</button>
+                    }
                 </div>
-            </div>
-        }
-    </div>
-    
-    <div class="sudoku--toolbar">
-        <div class="sudoku--info">
-            <div class="puzzle-title">
-                <h2>@_currentSession.Puzzle.Title</h2>
-                <button title="restart puzzle" class="restart" @onclick="OpenRestartModal"><svg><use href="/assets/icons/icons.svg#restart-alt" /></svg></button>
-            </div>
 
-            <div class="author">
-                <p>by @_currentSession.Puzzle.Constructor</p>
-                <span class="difficulty fs-s">@_currentSession.Puzzle.Difficulty</span>
-            </div>
-            
-            <div class="option">
-                <label for="difficulty-select"></label>
-                <select name="difficulties" id="difficulty-select" @onchange="LoadSession">
-                    <option value="" disabled selected hidden>Change puzzle</option>
-                    @foreach (var puzzle in _puzzles) {
-                        <option value="@puzzle.Id">@puzzle.Difficulty</option>
+                <div class="sudoku--controls @_currentSession.InputManager.InputMode.ToString().ToLower()">
+                    <button class="p0" @onclick="() => _currentSession.InputManager.HandleSet('0')">0</button>
+                    @for (int i = 1; i <= 9; i++) {
+                        var value = (char)('0' + i);
+                        <button @onclick="() => _currentSession.InputManager.HandleSet(value)">@i</button>
                     }
-                </select>
-            </div>
+                </div>
 
-            <div class="option">
-                <label for="theme-select"></label>
-                <select name="themes" id="theme-select">
-                    <option value="" disabled selected hidden>Change theme</option>
-                    <option value="Light">Light</option>
-                    <option value="Dark">Dark</option>
-                </select>
-            </div>
-        </div>
-
-        <div class="sudoku--hud">
-            <div class="input-mode-toggle">
-                @foreach (InputMode mode in Enum.GetValues(typeof(InputMode))) {
-                    <button class="@(_currentSession.InputManager.InputMode == mode ? "selected" : "")" @onclick="() => _currentSession.InputManager.SetInputMode(mode)">@mode.ToString()</button>
-                }
-            </div>
-
-            <div class="sudoku--controls @_currentSession.InputManager.InputMode.ToString().ToLower()">
-                <button class="p0"  @onclick="() => _currentSession.InputManager.HandleSet('0')">0</button>
-                @for (int i = 1; i <= 9; i++) {
-                    var value = (char)('0' + i);
-                    <button @onclick="() => _currentSession.InputManager.HandleSet(value)">@i</button>
-                }
-            </div>
-            
-            <div class="tools">
-                <button @onclick="_currentSession.InputManager.HandleUnset"><svg><use href="/assets/icons/icons.svg#close" /></svg></button>
-                <button @onclick="_currentSession.InputManager.Undo"><svg><use href="/assets/icons/icons.svg#undo" /></svg></button>
-                <button @onclick="_currentSession.InputManager.Redo"><svg><use href="/assets/icons/icons.svg#redo" /></svg></button>
-                <button @onclick="Solve"><svg><use href="/assets/icons/icons.svg#check" /></svg></button>
+                <div class="tools">
+                    <button @onclick="_currentSession.InputManager.HandleUnset"><svg><use href="/assets/icons/icons.svg#close"/></svg></button>
+                    <button @onclick="_currentSession.InputManager.Undo"><svg><use href="/assets/icons/icons.svg#undo"/></svg></button>
+                    <button @onclick="_currentSession.InputManager.Redo"><svg><use href="/assets/icons/icons.svg#redo"/></svg></button>
+                    <button @onclick="Solve"><svg><use href="/assets/icons/icons.svg#check"/></svg></button>
+                </div>
             </div>
         </div>
     </div>
-</div>
+}

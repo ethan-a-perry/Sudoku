@@ -15,14 +15,6 @@ public class PuzzleSession
     public SelectionManager SelectionManager { get; set; }
     public UndoRedoService UndoRedoService { get; set; }
 
-    public PuzzleSession() {
-        Grid = new Grid();
-        
-        SelectionManager = new SelectionManager();
-        UndoRedoService = new UndoRedoService(Grid, SelectionManager);
-        InputManager = new InputManager(Grid, SelectionManager, UndoRedoService);
-    }
-
     public PuzzleSession(PuzzleModel puzzle) {
         Puzzle = puzzle;
         

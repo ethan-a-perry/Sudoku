@@ -1,5 +1,5 @@
 using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Web;
+using Microsoft.JSInterop;
 using Sudoku.Blazor.Client.Services;
 using Sudoku.DataAccess.Data;
 using Sudoku.DataAccess.Services;
@@ -9,18 +9,19 @@ namespace Sudoku.Blazor.Client.Components.Shared;
 
 public partial class SudokuGrid : ComponentBase
 {
+    [Inject] IJSRuntime JSRuntime { get; set; } = null!;
     [Inject] private PuzzleStorageService PuzzleStorageService { get; set; }
     [Inject] private IPuzzleData PuzzleData { get; set; }
     private List<PuzzleModel> _puzzles = [];
     
     private List<PuzzleSession> _sessions = [];
-    private PuzzleSession _currentSession;
+    private PuzzleSession? _currentSession;
     
     private SudokuSolver SudokuSolver { get; set; } = new();
     private bool _isSolved;
-
-    private bool isRestartModalVisible;
-    private bool isSolveModalVisible;
+    
+    private bool _isRestartModalVisible;
+    private bool _isSolveModalVisible;
 
     protected override async Task OnInitializedAsync() {
         _puzzles = await PuzzleData.GetAllPuzzles();
@@ -36,6 +37,8 @@ public partial class SudokuGrid : ComponentBase
         if (OperatingSystem.IsBrowser()) {
             await LoadGrid(_puzzles.FirstOrDefault());
         }
+        
+        await JSRuntime.InvokeVoidAsync("eval", "window.dispatchEvent(new Event('sudokuAppReady'));");
     }
     
     private async Task LoadSession(ChangeEventArgs e) {
@@ -49,7 +52,7 @@ public partial class SudokuGrid : ComponentBase
             await LoadGrid(_currentSession.Puzzle);
         }
     }
-
+    
     private async Task LoadGrid(PuzzleModel puzzle) {
         var grid = await PuzzleStorageService.LoadGrid(puzzle.Id);
         
@@ -65,25 +68,25 @@ public partial class SudokuGrid : ComponentBase
     }
     
     private void OpenRestartModal() {
-        isSolveModalVisible = false;
-        isRestartModalVisible = true;
+        _isSolveModalVisible = false;
+        _isRestartModalVisible = true;
     }
-
+    
     private void OpenSolveModal() {
-        isRestartModalVisible = false;
-        isSolveModalVisible = true;
+        _isRestartModalVisible = false;
+        _isSolveModalVisible = true;
     }
-
+    
     private void CloseModal() {
-        isRestartModalVisible = false;
-        isSolveModalVisible = false;
+        _isRestartModalVisible = false;
+        _isSolveModalVisible = false;
     }
     
     private async Task Restart() {
         _isSolved = false;
         CloseModal();
         var currentPuzzle = _puzzles.FirstOrDefault(p => p.Id == _currentSession.Puzzle.Id);
-
+    
         _currentSession = new PuzzleSession(currentPuzzle);
         
         await PuzzleStorageService.SaveGrid(_currentSession.Puzzle.Id, _currentSession.Grid);
