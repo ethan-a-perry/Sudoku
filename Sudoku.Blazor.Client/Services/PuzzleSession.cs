@@ -20,20 +20,15 @@ public class PuzzleSession(ILocalStorageService localStorage)
     public async Task InitializeAsync(PuzzleModel puzzle) {
         Puzzle = puzzle;
         
-        Grid = new Grid(puzzle.NumRows, puzzle.NumCols);
-        Grid.LoadPuzzle(puzzle.Grid);
-        
-        var grid = await LoadGrid(Puzzle.Id);
+        var grid = await LoadGrid(puzzle.Id);
         
         if (grid is null) {
             Grid = new Grid(puzzle.NumRows, puzzle.NumCols);
-            await SaveGrid(Puzzle.Id, Grid);
+            Grid.LoadPuzzle(puzzle.Grid);
+            await SaveGrid(puzzle.Id, Grid);
         }
         else {
-            // Copies data from one cell to the other. Important to preserve the references.
-            for (int i = 0; i < Grid.GetCells().Count; i++) {
-                Grid.GetCells()[i].CopyFrom(grid.GetCells()[i]);
-            }
+            Grid = grid;
         }
         
         SelectionManager = new SelectionManager();
@@ -43,24 +38,20 @@ public class PuzzleSession(ILocalStorageService localStorage)
         InputManager.CellUpdated += OnCellUpdated;
     }
 
-    public async Task OnCellUpdated() {
-        Console.WriteLine("Cell updated");
-        
+    private async Task OnCellUpdated() {
         try {
-            Console.WriteLine("Trying save");
             await SaveGrid(Puzzle.Id, Grid);
-            Console.WriteLine("Finished save");
         }
         catch (Exception ex) {
             await Console.Error.WriteLineAsync($"Failed to save puzzle: {ex}");
         }
     }
 
-    public async Task SaveGrid(string id, Grid grid) {
+    private async Task SaveGrid(string id, Grid grid) {
         await localStorage.SetItemAsync($"puzzle_{id}", grid);
     }
     
-    public async Task<Grid?> LoadGrid(string id) {
+    private async Task<Grid?> LoadGrid(string id) {
         return await localStorage.GetItemAsync<Grid>($"puzzle_{id}");
     }
 }
