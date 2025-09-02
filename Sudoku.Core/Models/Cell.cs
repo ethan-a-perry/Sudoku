@@ -7,12 +7,4 @@ public class Cell(int row, int col)
     public char Value { get; set; } = '\0';
     public bool IsGiven { get; set; }
     public PencilMarks PencilMarks { get; set; } = new();
-
-    public void CopyFrom(Cell other) {
-        Row = other.Row;
-        Col = other.Col;
-        Value = other.Value;
-        IsGiven = other.IsGiven;
-        PencilMarks = other.PencilMarks;
-    }
 }

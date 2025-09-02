@@ -8,7 +8,7 @@
         @onkeydown:preventDefault="true"
         @onkeyup="_currentSession.InputManager.OnKeyUp">
         <div class="sudoku--grid--wrapper">
-            <div class="sudoku--grid @(_isSolved ? "solved" : "")">
+            <div class="sudoku--grid @(_currentSession.IsSolved ? "solved" : "")">
                 @foreach (var cell in _currentSession.Grid.GetCells()) {
                     var row = cell.Row;
                     var col = cell.Col;
@@ -63,7 +63,7 @@
             @if (_isSolveModalVisible) {
                 <div class="modal--overlay">
                     <div class="modal--box">
-                        @if (_isSolved) {
+                        @if (_currentSession.IsSolved) {
                             <h2>Congratulations, you solved it!</h2>
                             <p>Great job — you can see the puzzle or restart a new session.</p>
                             <div class="modal--options">

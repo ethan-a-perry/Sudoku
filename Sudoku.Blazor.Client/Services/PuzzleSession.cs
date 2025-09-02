@@ -1,8 +1,5 @@
 using Blazored.LocalStorage;
-using Microsoft.AspNetCore.Components;
-using Sudoku.Core.Enums;
 using Sudoku.Core.Models;
-using Sudoku.DataAccess;
 using Sudoku.DataAccess.Models;
 using Sudoku.DataAccess.Services;
 
@@ -17,6 +14,9 @@ public class PuzzleSession(ILocalStorageService localStorage)
     public SelectionManager SelectionManager { get; set; }
     public UndoRedoService UndoRedoService { get; set; }
     
+    private SudokuSolver SudokuSolver { get; set; } = new();
+    public bool IsSolved { get; set; }
+    
     public async Task InitializeAsync(PuzzleModel puzzle) {
         Puzzle = puzzle;
         
@@ -30,12 +30,27 @@ public class PuzzleSession(ILocalStorageService localStorage)
         else {
             Grid = grid;
         }
+
+        Solve();
         
         SelectionManager = new SelectionManager();
         UndoRedoService = new UndoRedoService(Grid, SelectionManager);
         InputManager = new InputManager(Grid, SelectionManager, UndoRedoService);
     
         InputManager.CellUpdated += OnCellUpdated;
+    }
+
+    public async Task ClearSession() {
+        await DeleteGrid(Puzzle.Id);
+        Grid.Clear();
+        
+        IsSolved = false;
+        
+        await SaveGrid(Puzzle.Id, Grid);
+    }
+    
+    public void Solve() {
+        IsSolved = SudokuSolver.IsSolved(Grid);
     }
 
     private async Task OnCellUpdated() {
@@ -53,5 +68,9 @@ public class PuzzleSession(ILocalStorageService localStorage)
     
     private async Task<Grid?> LoadGrid(string id) {
         return await localStorage.GetItemAsync<Grid>($"puzzle_{id}");
+    }
+    
+    private async Task DeleteGrid(string id) {
+        await localStorage.RemoveItemAsync($"puzzle_{id}");
     }
 }

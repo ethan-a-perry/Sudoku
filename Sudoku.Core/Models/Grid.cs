@@ -110,4 +110,12 @@ public class Grid
             cell.PencilMarks.Center.Clear();
         }
     }
+
+    public void Clear() {
+        foreach (var cell in Cells.Where(cell => !cell.IsGiven)) {
+            cell.Value = '\0';
+            cell.PencilMarks.Corner.Clear();
+            cell.PencilMarks.Center.Clear();
+        }
+    }
 }
