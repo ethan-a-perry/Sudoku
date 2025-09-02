@@ -1,4 +1,3 @@
-using Blazored.LocalStorage;
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 using Sudoku.Blazor.Client.Services;
@@ -10,7 +9,7 @@ namespace Sudoku.Blazor.Client.Components.Shared;
 public partial class SudokuGrid : ComponentBase
 {
     [Inject] IJSRuntime JSRuntime { get; set; } = null!;
-    [Inject] private ILocalStorageService LocalStorageService { get; set; }
+    [Inject] private PuzzleSessionFactory PuzzleSessionFactory { get; set; }
     [Inject] private IPuzzleData PuzzleData { get; set; }
 
     private List<PuzzleModel> _puzzles = [];
@@ -24,8 +23,7 @@ public partial class SudokuGrid : ComponentBase
         _puzzles = await PuzzleData.GetAllPuzzles();
         
         foreach (var puzzle in _puzzles) {
-            var newSession = new PuzzleSession(LocalStorageService);
-            await newSession.InitializeAsync(puzzle);
+            var newSession = await PuzzleSessionFactory.Create(puzzle);
             _sessions.Add(newSession);
         }
         
@@ -34,7 +32,7 @@ public partial class SudokuGrid : ComponentBase
         await JSRuntime.InvokeVoidAsync("eval", "window.dispatchEvent(new Event('sudokuAppReady'));");
     }
     
-    private async Task LoadSession(ChangeEventArgs e) {
+    private void LoadSession(ChangeEventArgs e) {
         var puzzleId = e.Value is not null ? (string)e.Value : string.Empty;
         
         if (string.IsNullOrEmpty(puzzleId)) return;

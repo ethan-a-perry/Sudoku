@@ -15,10 +15,11 @@ public static class RegisterServices
             .AddInteractiveWebAssemblyComponents();
         
         builder.Services.AddMemoryCache();
-        
         builder.Services.AddSingleton<IDbConnection, DbConnection>();
         builder.Services.AddSingleton<IPuzzleData, MongoPuzzleData>();
         
         builder.Services.AddBlazoredLocalStorage();
+        
+        builder.Services.AddScoped<PuzzleSessionFactory>();
     }
 }
