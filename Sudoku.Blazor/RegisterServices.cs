@@ -20,6 +20,5 @@ public static class RegisterServices
         builder.Services.AddSingleton<IPuzzleData, MongoPuzzleData>();
         
         builder.Services.AddBlazoredLocalStorage();
-        builder.Services.AddScoped<PuzzleStorageService>();
     }
 }

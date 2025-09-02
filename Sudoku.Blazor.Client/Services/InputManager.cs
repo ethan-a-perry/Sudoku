@@ -13,7 +13,7 @@ public class InputManager(Grid grid, SelectionManager selectionManager, UndoRedo
     private bool _isMouseDown;
     private bool _isShiftKeyDown;
 
-    public event EventHandler? GridUpdate;
+    public event Func<Task>? CellUpdated;
 
     public void FilterKeyboardEvent(KeyboardEventArgs e) {
         switch (e.Key.ToLowerInvariant()) {
@@ -92,7 +92,7 @@ public class InputManager(Grid grid, SelectionManager selectionManager, UndoRedo
             }
         });
         
-        GridUpdate?.Invoke(this, EventArgs.Empty);
+        TriggerCellUpdated();
     }
 
     public void HandleUnset() {
@@ -117,7 +117,7 @@ public class InputManager(Grid grid, SelectionManager selectionManager, UndoRedo
             grid.UnsetCenterPencilMarks(EditableCells);
         });
         
-        GridUpdate?.Invoke(this, EventArgs.Empty);
+        TriggerCellUpdated();
     }
     
     public void OnMouseDown(MouseEventArgs e, int row, int col) {
@@ -158,11 +158,17 @@ public class InputManager(Grid grid, SelectionManager selectionManager, UndoRedo
     
     public void Undo() {
         undoRedoService.Undo();
-        GridUpdate?.Invoke(this, EventArgs.Empty);
+
+        TriggerCellUpdated();
     }
 
     public void Redo() {
         undoRedoService.Redo();
-        GridUpdate?.Invoke(this, EventArgs.Empty);
+
+        TriggerCellUpdated();
+    }
+    
+    public void TriggerCellUpdated() {
+        CellUpdated?.Invoke();
     }
 }

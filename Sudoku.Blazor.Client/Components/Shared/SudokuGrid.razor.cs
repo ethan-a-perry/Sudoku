@@ -1,3 +1,4 @@
+using Blazored.LocalStorage;
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 using Sudoku.Blazor.Client.Services;
@@ -10,8 +11,9 @@ namespace Sudoku.Blazor.Client.Components.Shared;
 public partial class SudokuGrid : ComponentBase
 {
     [Inject] IJSRuntime JSRuntime { get; set; } = null!;
-    [Inject] private PuzzleStorageService PuzzleStorageService { get; set; }
+    [Inject] private ILocalStorageService LocalStorageService { get; set; }
     [Inject] private IPuzzleData PuzzleData { get; set; }
+
     private List<PuzzleModel> _puzzles = [];
     
     private List<PuzzleSession> _sessions = [];
@@ -27,16 +29,12 @@ public partial class SudokuGrid : ComponentBase
         _puzzles = await PuzzleData.GetAllPuzzles();
         
         foreach (var puzzle in _puzzles) {
-            _sessions.Add(new PuzzleSession(puzzle));
+            var newSession = new PuzzleSession(LocalStorageService);
+            await newSession.InitializeAsync(puzzle);
+            _sessions.Add(newSession);
         }
         
         _currentSession = _sessions[0];
-        
-        _currentSession.InputManager.GridUpdate += HandleGridUpdate;
-        
-        if (OperatingSystem.IsBrowser()) {
-            await LoadGrid(_puzzles.FirstOrDefault());
-        }
         
         await JSRuntime.InvokeVoidAsync("eval", "window.dispatchEvent(new Event('sudokuAppReady'));");
     }
@@ -47,24 +45,6 @@ public partial class SudokuGrid : ComponentBase
         if (string.IsNullOrEmpty(puzzleId)) return;
         
         _currentSession = _sessions.FirstOrDefault(s => s.Puzzle.Id == puzzleId)!;
-    
-        if (OperatingSystem.IsBrowser()) {
-            await LoadGrid(_currentSession.Puzzle);
-        }
-    }
-    
-    private async Task LoadGrid(PuzzleModel puzzle) {
-        var grid = await PuzzleStorageService.LoadGrid(puzzle.Id);
-        
-        if (grid is null) {
-            await PuzzleStorageService.SaveGrid(puzzle.Id, _currentSession.Grid);
-        }
-        else {
-            // Copies data from one cell to the other. Important to preserve the references.
-            for (int i = 0; i < _currentSession.Grid.GetCells().Count; i++) {
-                _currentSession.Grid.GetCells()[i].CopyFrom(grid.GetCells()[i]);
-            }
-        }
     }
     
     private void OpenRestartModal() {
@@ -87,26 +67,12 @@ public partial class SudokuGrid : ComponentBase
         CloseModal();
         var currentPuzzle = _puzzles.FirstOrDefault(p => p.Id == _currentSession.Puzzle.Id);
     
-        _currentSession = new PuzzleSession(currentPuzzle);
-        
-        await PuzzleStorageService.SaveGrid(_currentSession.Puzzle.Id, _currentSession.Grid);
+        _currentSession = new PuzzleSession(LocalStorageService);
+        await _currentSession.InitializeAsync(currentPuzzle);
     }
     
     private void Solve() {
         _isSolved = SudokuSolver.IsSolved(_currentSession.Grid);
         OpenSolveModal();
-    }
-    
-    private async void HandleGridUpdate(object? sender, EventArgs e) {
-        try {
-            await PuzzleStorageService.SaveGrid(_currentSession.Puzzle.Id, _currentSession.Grid);
-        }
-        catch (Exception ex) {
-            await Console.Error.WriteLineAsync($"Failed to save puzzle: {ex}");
-        }
-    }
-    
-    public void Dispose() {
-        _currentSession.InputManager.GridUpdate -= HandleGridUpdate;
     }
 }

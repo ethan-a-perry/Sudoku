@@ -13,6 +13,5 @@ public static class RegisterServices
         builder.Services.AddSingleton<IPuzzleData, JsonPuzzleData>();
         
         builder.Services.AddBlazoredLocalStorage();
-        builder.Services.AddScoped<PuzzleStorageService>();
     }
 }
