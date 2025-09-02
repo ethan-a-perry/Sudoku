@@ -17,9 +17,8 @@ public partial class SudokuGrid : ComponentBase
     
     private List<PuzzleSession> _sessions = [];
     private PuzzleSession? _currentSession;
-    
-    private bool _isRestartModalVisible;
-    private bool _isSolveModalVisible;
+
+    private string _activeDialog = string.Empty;
 
     protected override async Task OnInitializedAsync() {
         _puzzles = await PuzzleData.GetAllPuzzles();
@@ -42,29 +41,14 @@ public partial class SudokuGrid : ComponentBase
         
         _currentSession = _sessions.FirstOrDefault(s => s.Puzzle.Id == puzzleId)!;
     }
-    
-    private void OpenRestartModal() {
-        _isSolveModalVisible = false;
-        _isRestartModalVisible = true;
-    }
-    
-    private void OpenSolveModal() {
-        _isRestartModalVisible = false;
-        _isSolveModalVisible = true;
-    }
-    
-    private void CloseModal() {
-        _isRestartModalVisible = false;
-        _isSolveModalVisible = false;
-    }
 
     private void Solve() {
         _currentSession.Solve();
-        OpenSolveModal();
+        _activeDialog = "solve";
     }
     
     private async Task Restart() {
-        CloseModal();
+        _activeDialog = string.Empty;
         await _currentSession.ClearSession();
     }
 }

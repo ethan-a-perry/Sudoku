@@ -32,13 +32,14 @@
 }
 
 .sudoku {
+    position: relative;
+    
     display: grid;
     grid-template-columns: minmax(0, 75svh) minmax(0, 300px);
     gap: 2rem;
 }
 
 .sudoku--grid--wrapper {
-    position: relative;
     width: 100%;
 }
 
@@ -408,6 +409,9 @@
 
 .modal--box {
     position: relative;
+    
+    max-width: 65ch;
+    
     background: var(--color-site-background);
     padding: 1rem 1.5rem;
     border-radius: 12px;
