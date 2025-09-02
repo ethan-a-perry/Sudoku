@@ -13,8 +13,8 @@ public class PuzzleSession(ILocalStorageService localStorage)
     public InputManager InputManager { get; set; }
     public SelectionManager SelectionManager { get; set; }
     public UndoRedoService UndoRedoService { get; set; }
-    
-    private SudokuSolver SudokuSolver { get; set; } = new();
+
+    private SudokuValidator _sudokuValidator = new();
     public bool IsSolved { get; set; }
     
     public async Task InitializeAsync(PuzzleModel puzzle) {
@@ -50,7 +50,8 @@ public class PuzzleSession(ILocalStorageService localStorage)
     }
     
     public void Solve() {
-        IsSolved = SudokuSolver.IsSolved(Grid);
+        List<char> grid = Grid.GetCells().Select(cell => cell.Value).ToList();
+        IsSolved = _sudokuValidator.IsValid(grid, Grid.NumRows, Grid.NumCols, 3, 3);
     }
 
     private async Task OnCellUpdated() {
