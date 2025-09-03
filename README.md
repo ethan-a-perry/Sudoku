@@ -1,5 +1,4 @@
 # Sudoku App
-***
 
 An interactive Sudoku app featuring playable puzzles and full pencil mark support.
 
@@ -70,5 +69,7 @@ Note: For use in my Astro website, I only needed the */_framework* and */sudoku/
 located in the */publish/wwwroot* directory.
 
 ## Acknowledgements
-Inspired by my experience playing sudoku on [Sven's Sudoku Pad](https://sudokupad.app/) (featured on [Cracking the Cryptic YouTube channel](https://www.youtube.com/@CrackingTheCryptic)).
-This project is my own implementation of a full-featured Sudoku app, built entirely in C# with Blazor, without using any JavaScript.
+This project is my own implementation of a full-featured Sudoku app, built entirely in C# with Blazor, without using any JavaScript.  
+However, it was inspired by my experience playing Sudoku on [Sven's Sudoku Pad](https://sudokupad.app/) 
+(featured on [Cracking the Cryptic YouTube channel](https://www.youtube.com/@CrackingTheCryptic)) and, more loosely, on
+the [New York Times Sudoku](https://www.nytimes.com/puzzles/sudoku) website.
