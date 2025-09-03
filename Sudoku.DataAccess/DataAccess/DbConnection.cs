@@ -16,6 +16,8 @@ public class DbConnection : IDbConnection
     
     public DbConnection(IConfiguration config) {
         _config = config;
+        
+        // Connection string in user secrets
         Client = new MongoClient(_config.GetConnectionString(_connectionId));
         _db = Client.GetDatabase(_config["DatabaseName"]);
 

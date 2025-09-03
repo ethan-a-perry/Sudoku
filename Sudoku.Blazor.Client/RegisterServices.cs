@@ -8,6 +8,7 @@ namespace Sudoku.Blazor.Client;
 public static class RegisterServices
 {
     public static void ConfigureServices(this WebAssemblyHostBuilder builder) {
+        // JSON Data Access
         builder.Services.AddSingleton(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
         builder.Services.AddSingleton<IPuzzleData, JsonPuzzleData>();
         

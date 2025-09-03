@@ -1,10 +1,15 @@
 using Blazored.LocalStorage;
 using Sudoku.Core.Models;
 using Sudoku.DataAccess.Models;
-using Sudoku.DataAccess.Services;
+using Sudoku.Core.Services;
 
 namespace Sudoku.Blazor.Client.Services;
 
+/// <summary>
+/// Manages the state of the active puzzle session. 
+/// Provides selection handling, undo/redo functionality, and persistence of the puzzle grid to local storage.
+/// Also tracks whether the puzzle is solved.
+/// </summary>
 public class PuzzleSession(ILocalStorageService localStorage)
 {
     public PuzzleModel Puzzle { get; set; }
@@ -17,7 +22,11 @@ public class PuzzleSession(ILocalStorageService localStorage)
     private SudokuValidator _sudokuValidator = new();
     public bool IsSolved { get; set; }
     
-    public async Task InitializeAsync(PuzzleModel puzzle) {
+    /// <summary>
+    /// Initializes the puzzle session.
+    /// If possible, it gets the grid values from local storage, otherwise it builds a new grid.
+    /// </summary>
+    public async Task Initialize(PuzzleModel puzzle) {
         Puzzle = puzzle;
         
         var grid = await LoadGrid(puzzle.Id);
@@ -31,15 +40,20 @@ public class PuzzleSession(ILocalStorageService localStorage)
             Grid = grid;
         }
 
+        // Solve initially as it may have been previously solved and saved in local storage.
         Solve();
         
         SelectionManager = new SelectionManager();
         UndoRedoService = new UndoRedoService(Grid, SelectionManager);
         InputManager = new InputManager(Grid, SelectionManager, UndoRedoService);
     
+        // Subscribe to event in InputManager. Triggered whenever a cell in updated.
         InputManager.CellUpdated += OnCellUpdated;
     }
 
+    /// <summary>
+    /// Reset puzzle sessions without destroying references.
+    /// </summary>
     public async Task ClearSession() {
         await DeleteGrid(Puzzle.Id);
         Grid.Clear();

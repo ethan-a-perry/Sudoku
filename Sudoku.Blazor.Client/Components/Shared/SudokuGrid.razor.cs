@@ -20,8 +20,10 @@ public partial class SudokuGrid : ComponentBase
     private string _activeDialog = string.Empty;
 
     protected override async Task OnInitializedAsync() {
+        // Get available puzzles from data access.
         _puzzles = await PuzzleData.GetAllPuzzles();
         
+        // Create a session for each playable puzzle.
         foreach (var puzzle in _puzzles) {
             var newSession = await PuzzleSessionFactory.Create(puzzle);
             _sessions.Add(newSession);
@@ -29,6 +31,8 @@ public partial class SudokuGrid : ComponentBase
         
         _currentSession = _sessions[0];
         
+        
+        // Dispatch a global 'sudokuAppReady' event to signal that the grid has finished initializing.
         await JSRuntime.InvokeVoidAsync("eval", "window.dispatchEvent(new Event('sudokuAppReady'));");
     }
     

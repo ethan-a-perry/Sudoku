@@ -1,5 +1,5 @@
 :root {
-    --grid-theme: "Standard";
+    --grid-theme: "Light";
 
     --color-site-background: hsl(51, 41%, 97%);
 
@@ -23,12 +23,12 @@
     --color-accent-secondary-100: hsla(var(--_color-accent-secondary), 1);
 }
 
-:root:has(option[value="Standard"]:checked) {
-    --grid-theme: "Standard";
+:root:has(option[value="Light"]:checked) {
+    --grid-theme: "Light";
 }
 
-:root:has(option[value="Persona"]:checked) {
-    --grid-theme: "Persona";
+:root:has(option[value="Dark"]:checked) {
+    --grid-theme: "Dark";
 }
 
 .sudoku {
@@ -48,10 +48,7 @@
 
     display: grid;
     grid-template-columns: repeat(9, 1fr);
-
-    /*width: 100%;*/
-    /*max-width: 75svh;*/
-
+    
     outline: 2px solid #444;
 
     user-select: none;
@@ -103,17 +100,8 @@
 }
 
 .cell[aria-selected="true"] {
-    @container style(--grid-theme: "Standard") {
+    @container style(--grid-theme: "Light") {
         --color-selected-cell-background: #ddeada;
-    }
-    
-    @container style(--grid-theme: "Persona") {
-        background: repeating-linear-gradient(45deg, #ff0033, #ff0033 10px, #cc0029 10px, #cc0029 20px);
-        border: 3px solid black;
-        box-shadow: 6px 6px 0 black;
-        transform: rotate(-1deg);
-        color: white;
-        font-weight: bold;
     }
 }
 
@@ -389,9 +377,6 @@
         }
     }
 }
-
-
-
 
 .modal--overlay {
     position: absolute;

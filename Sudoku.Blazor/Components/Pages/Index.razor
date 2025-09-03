@@ -2,6 +2,7 @@
 
 @using Sudoku.Blazor.Client.Components.Shared
 
+@* Create element with id="sudoku=app" to mount the SudokuGrid component into the DOM *@
 <div id="sudoku-app">
     <SudokuGrid @rendermode="new InteractiveWebAssemblyRenderMode(prerender: false)"></SudokuGrid>
 </div>

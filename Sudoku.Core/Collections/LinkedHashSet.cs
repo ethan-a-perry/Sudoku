@@ -1,4 +1,4 @@
-namespace Sudoku.DataAccess;
+namespace Sudoku.Core.Collections;
 
 public class LinkedHashSet<T> : IEnumerable<T> where T : notnull
 {

@@ -1,7 +1,7 @@
 using Sudoku.Core.Models;
 using Sudoku.Core.Records;
 
-namespace Sudoku.DataAccess.Services;
+namespace Sudoku.Core.Services;
 
 public class SnapshotManager
 {
@@ -26,6 +26,8 @@ public class SnapshotManager
     }
     
     public Snapshot Undo() {
+        // Returns snapshot according the current node, not the previous node
+        // because a snapshot holds the before and after value of each snapshot.
         var snapshot = _current.Value;
         
         if (_current.Previous is not null) {

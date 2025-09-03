@@ -1,7 +1,7 @@
 namespace Sudoku.Core.Enums;
 
 /// <summary>
-/// Specifies various grid states which dictate how cells are toggled.
+/// Specifies various grid states which dictate how cells are selected.
 /// </summary>
 /// <remarks>
 /// Regular: Anytime a cell is selected, it deselects all other cells and toggles the current selection.

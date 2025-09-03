@@ -14,6 +14,7 @@ public static class RegisterServices
             .AddInteractiveServerComponents()
             .AddInteractiveWebAssemblyComponents();
         
+        // MongoDB Access
         builder.Services.AddMemoryCache();
         builder.Services.AddSingleton<IDbConnection, DbConnection>();
         builder.Services.AddSingleton<IPuzzleData, MongoPuzzleData>();

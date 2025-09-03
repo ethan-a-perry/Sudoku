@@ -7,7 +7,7 @@ public class PuzzleSessionFactory(ILocalStorageService localStorage)
 {
     public async Task<PuzzleSession> Create(PuzzleModel puzzle) {
         var session = new PuzzleSession(localStorage);
-        await session.InitializeAsync(puzzle);
+        await session.Initialize(puzzle);
         return session;
     }
 }

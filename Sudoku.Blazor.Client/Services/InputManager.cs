@@ -4,6 +4,9 @@ using Sudoku.Core.Models;
 
 namespace Sudoku.Blazor.Client.Services;
 
+/// <summary>
+/// Handles logic related to user input from the UI.
+/// </summary>
 public class InputManager(Grid grid, SelectionManager selectionManager, UndoRedoService undoRedoService)
 {
     public InputMode InputMode { get; set; } = InputMode.Normal;
@@ -95,6 +98,11 @@ public class InputManager(Grid grid, SelectionManager selectionManager, UndoRedo
         TriggerCellUpdated();
     }
 
+    /// <summary>
+    /// Defines the order in which values are removed from editable cells. 
+    /// By default, digits are removed first, followed by corner pencil marks, 
+    /// and finally center pencil marks (unless the input mode or cell state requires a different order).
+    /// </summary>
     public void HandleUnset() {
         undoRedoService.RecordSnapshot(() => {
             // If any cells have Digits, remove then return
@@ -142,7 +150,7 @@ public class InputManager(Grid grid, SelectionManager selectionManager, UndoRedo
     }
     
     public void OnKeyDown(KeyboardEventArgs e) {
-        // If the shiftkey is pressed, Select or Delete mode can be activated.
+        // If the shift key is pressed, Select or Delete mode can be activated.
         _isShiftKeyDown = e.ShiftKey;
     
         FilterKeyboardEvent(e);
