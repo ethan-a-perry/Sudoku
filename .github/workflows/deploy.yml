@@ -28,6 +28,9 @@ jobs:
       
       - name: Copy Published Directories
         run: |
+          rm -rf temp/public/sudoku/_framework
+          rm -rf temp/public/sudoku/data
+          
           mkdir -p temp/public/sudoku/_framework
           mkdir -p temp/public/sudoku/data
           
