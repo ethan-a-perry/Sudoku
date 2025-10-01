@@ -7,7 +7,7 @@ This project was an exercise in building a full-featured, interactive Sudoku app
 
 Visit my personal website to play the puzzle and learn more about this project.
 
-[Play here](https://ethanperry.net/work/sudoku)
+[Play here](https://ethanperry.co/work/sudoku)
 
 **Current features:**
 * Playable puzzles with validation
