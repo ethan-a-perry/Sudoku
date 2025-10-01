@@ -1,0 +1,49 @@
+name: Deploy
+
+on:
+  workflow_dispatch:
+  workflow_run:
+    workflows: ["Test Build"]
+    types:
+      - completed
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    
+    steps:
+      - uses: actions/checkout@v5
+      
+      - name: Setup .NET 9
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 9.x
+
+      - name: Publish Blazor Client
+          run: dotnet publish Sudoku.Blazor.Client --configuration Release --output ./publish
+            
+      # Checkout deploy repo
+      - uses: actions/checkout@v5
+        with:
+          repository: perry-ethan/ethanperry
+          path: temp
+          token: ${{ secrets.DEPLOY_SUDOKU }}
+      
+      - name: Copy Published Directories
+        run: |
+          mkdir -p temp/public/sudoku/_framework
+          mkdir -p temp/public/sudoku/data
+          
+          # Copy data and _framework directory to ethanperry/public/sudoku
+          cp -r publish/wwwroot/_framework/* temp/public/sudoku/_framework/
+          cp -r public/wwwroot/sudoku/data/* temp/public/sudoku/data/
+      
+      - name: Commit and Push Changes
+        run: |
+          cd temp
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add public/sudoku/_framework/* public/sudoku/data/*
+          git commit -m "Update Sudoku publish output"
+          git push
