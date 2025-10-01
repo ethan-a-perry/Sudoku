@@ -60,7 +60,7 @@ dotnet run
 Navigate to the specified address to use the app.
 
 If you would like to publish the client as an independent WebAssembly app to take or use elsewhere, you can do so with the following instructions.
-This code will place the WASM project files in the /publish directory (or somewhere else if you specify different) in the project root.
+This code will publish the WASM project and place the files in the /publish directory (or somewhere else if you specify different).
 
 ```shell
 cd Sudoku
