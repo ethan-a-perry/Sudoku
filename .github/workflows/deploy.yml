@@ -36,7 +36,7 @@ jobs:
           
           # Copy data and _framework directory to ethanperry/public/sudoku
           cp -r publish/wwwroot/_framework/* temp/public/sudoku/_framework/
-          cp -r public/wwwroot/sudoku/data/* temp/public/sudoku/data/
+          cp -r publish/wwwroot/sudoku/data/* temp/public/sudoku/data/
       
       - name: Commit and Push Changes
         run: |
