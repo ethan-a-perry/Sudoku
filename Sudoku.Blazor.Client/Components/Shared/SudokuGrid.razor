@@ -25,7 +25,7 @@
                         else {
                             if (cell.PencilMarks.Corner.Count > 0) {
                                 int index = 1;
-                                <div class="pencil-marks corner">
+                                <div class="pencil-marks corner" data-pm-count="@cell.PencilMarks.Corner.Count">
                                     @foreach (var pencilMark in cell.PencilMarks.Corner) {
                                         <span class="pencil-mark @($"p{index}")">@pencilMark</span>
                                         index++;
