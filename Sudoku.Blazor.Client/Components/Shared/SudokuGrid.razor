@@ -34,7 +34,7 @@
                             }
 
                             if (cell.PencilMarks.Center.Count > 0) {
-                                <div class="pencil-marks center @(cell.PencilMarks.Center.Count == 8 ? "eight-digits" : "") @(cell.PencilMarks.Center.Count == 9 ? "nine-digits" : "")">
+                                <div class="pencil-marks center" data-pm-count="@cell.PencilMarks.Center.Count">
                                     @foreach (var pencilMark in cell.PencilMarks.Center) {
                                         <span class="pencil-mark">@pencilMark</span>
                                     }

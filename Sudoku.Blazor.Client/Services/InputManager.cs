@@ -77,6 +77,7 @@ public class InputManager(Grid grid, SelectionManager selectionManager, UndoRedo
                     }
                     break;
                 case InputMode.Corner:
+                    // If digit selected is already present, just unselect it
                     if (EditableCells.All(c => c.PencilMarks.Corner.Contains(input))) {
                         grid.UnsetCornerPencilMark(EditableCells, input);
                     }
@@ -85,6 +86,7 @@ public class InputManager(Grid grid, SelectionManager selectionManager, UndoRedo
                     }
                     break;
                 case InputMode.Center:
+                    // If digit selected is already present, just unselect it
                     if (EditableCells.All(c => c.PencilMarks.Center.Contains(input))) {
                         grid.UnsetCenterPencilMark(EditableCells, input);
                     }

@@ -73,7 +73,10 @@ public class Grid
     
     public void SetCornerPencilMark(IEnumerable<Cell> cells, char value) {
         foreach (Cell cell in cells) {
-            if (cell.Value is '\0') {
+            // Only place a corner pencil mark if the following conditions are met:
+            // 1. A main digit has not been placed
+            // 2. There are less than 9 corner pencil marks already placed
+            if (cell.Value is '\0' && cell.PencilMarks.Corner.Count < 9) {
                 cell.PencilMarks.Corner.Add(value);
             }
         }
@@ -93,7 +96,10 @@ public class Grid
     
     public void SetCenterPencilMark(IEnumerable<Cell> cells, char value) {
         foreach (Cell cell in cells) {
-            if (cell.Value is '\0') {
+            // Only place a center pencil mark if the following conditions are met:
+            // 1. A main digit has not been placed
+            // 2. There are less than 9 center pencil marks already placed
+            if (cell.Value is '\0' && cell.PencilMarks.Center.Count < 9) {
                 cell.PencilMarks.Center.Add(value);
             }
         }
