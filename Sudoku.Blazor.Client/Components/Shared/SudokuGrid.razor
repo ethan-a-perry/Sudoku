@@ -3,7 +3,7 @@
 @if (_currentSession is not null) {
     <div class="sudoku" tabindex="0" @onkeydown="_currentSession.InputManager.OnKeyDown" @onkeydown:preventDefault="true" @onkeyup="_currentSession.InputManager.OnKeyUp">
         
-        <div class="grid @(_currentSession.IsSolved ? "solved" : "")">
+        <div class="sudoku-grid @(_currentSession.IsSolved ? "solved" : "")">
             @foreach (var cell in _currentSession.Grid.GetCells()) {
                 var row = cell.Row;
                 var col = cell.Col;
@@ -22,7 +22,7 @@
                             int index = 1;
                             <div class="pencil-marks corner" data-pm-count="@cell.PencilMarks.Corner.Count">
                                 @foreach (var pencilMark in cell.PencilMarks.Corner) {
-                                    <span class="pencil-mark @($"p{index}")">@pencilMark</span>
+                                    <span class="@($"p{index}")">@pencilMark</span>
                                     index++;
                                 }
                             </div>
@@ -31,7 +31,7 @@
                         if (cell.PencilMarks.Center.Count > 0) {
                             <div class="pencil-marks center" data-pm-count="@cell.PencilMarks.Center.Count">
                                 @foreach (var pencilMark in cell.PencilMarks.Center) {
-                                    <span class="pencil-mark">@pencilMark</span>
+                                    <span>@pencilMark</span>
                                 }
                             </div>
                         }
@@ -61,7 +61,7 @@
                 </select>
             </div>
 
-            <div class="option">
+            <div class="info-option">
                 <label for="theme-select"></label>
                 <select name="themes" id="theme-select">
                     <option value="" disabled selected hidden>Change theme</option>
