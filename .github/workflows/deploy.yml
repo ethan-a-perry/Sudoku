@@ -21,7 +21,7 @@ jobs:
       # Checkout deploy repo
       - uses: actions/checkout@v5
         with:
-          repository: perry-ethan/ethanperry
+          repository: ethan-a-perry/ethanperry
           path: temp
           token: ${{ secrets.DEPLOY_SUDOKU }}
       
