@@ -41,6 +41,9 @@ MongoDB and demonstrates different data access methods depending on the renderin
 Lastly, rather than deploying the app as a standalone app, it is published and embedded into my Astro-based personal
 website, which manages global layout and styling and offers a more unified user experience.
 
+*Note: sometimes WASM apps run slightly slower on Firefox on IOS mobile devices. If you notice a slight lag, try switching
+to a different browser. Firefox should run very well on desktop/computers.*
+
 ## Installation
 Prerequisites:
 * [.NET 9 SDK](https://dotnet.microsoft.com/en-us/download/dotnet/9.0)
