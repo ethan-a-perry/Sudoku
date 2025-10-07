@@ -50,7 +50,7 @@ Prerequisites:
 
 Clone the repository:
 ```shell
-git clone https://github.com/perry-ethan/Sudoku.git
+git clone https://github.com/ethan-a-perry/Sudoku.git
 ```
 
 To run the web app locally, you must execute it from the server-side project (Sudoku.Blazor) as this project is not a standalone WebAssembly app.
